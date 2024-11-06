@@ -12,7 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-    public class UserService {
+public class UserService {
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
@@ -24,6 +25,12 @@ import org.springframework.stereotype.Service;
     }
 
     public void register(RegisterRequest request) {
+        // Check if the user already exists by email
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("Email already in use");
+        }
+
+        // Create and save the new user
         User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
@@ -32,11 +39,15 @@ import org.springframework.stereotype.Service;
     }
 
     public String authenticate(LoginRequest request) {
+        // Find the user by email
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        // Check if the provided password matches the stored password
         if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             return jwtProvider.generateToken(user);
         }
+
         throw new BadCredentialsException("Invalid credentials");
     }
 }
