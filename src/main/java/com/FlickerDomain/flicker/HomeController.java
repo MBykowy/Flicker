@@ -1,4 +1,4 @@
-package com.example.flicker;
+package com.FlickerDomain.flicker;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
