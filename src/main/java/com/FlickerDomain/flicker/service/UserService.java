@@ -1,6 +1,13 @@
 package com.FlickerDomain.flicker.service;
 
-import com.FlickerDomain.flicker.security.JwtProvider;
+import com.FlickerDomain.flicker.model.User;                    // For User entity
+import com.FlickerDomain.flicker.repository.UserRepository;      // For UserRepository interface
+import com.FlickerDomain.flicker.dto.RegisterRequest;            // For RegisterRequest DTO
+import com.FlickerDomain.flicker.dto.LoginRequest;               // For LoginRequest DTO
+import com.FlickerDomain.flicker.security.JwtProvider;           // For JwtProvider
+
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

@@ -1,8 +1,12 @@
 package com.FlickerDomain.flicker.security;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import com.FlickerDomain.flicker.model.User; // Import modelu User
 
 @Component
 public class JwtProvider {

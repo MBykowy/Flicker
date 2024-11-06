@@ -24,6 +24,27 @@ dependencies {
     runtimeOnly 'com.mysql:mysql-connector-j'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Zależności Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-web'  // Starter web (REST API)
+    implementation 'org.springframework.boot:spring-boot-starter-security'  // Starter bezpieczeństwa
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'  // Starter JPA
+    implementation 'org.springframework.boot:spring-boot-starter-validation'  // Starter walidacji (np. do @Valid)
+
+// https://mvnrepository.com/artifact/com.auth0/java-jwt
+    implementation 'com.auth0:java-jwt:2.0.1'
+
+    // Zależności do bazy danych (MySQL)
+    implementation 'mysql:mysql-connector-java:8.0.33' // Sterownik MySQL
+
+    // Zależności do testów
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'  // Starter testów Spring Boot
+    testImplementation 'org.mockito:mockito-core:5.1.1'  // Mockito do mockowania obiektów
+    testImplementation 'org.springframework.security:spring-security-test'  // Testowanie z Spring Security
+
+    // Zależności do zarządzania CORS, jeśli planujesz udostępniać API z innych domen
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'  // Jeśli potrzebujesz obsługi CORS
+
 }
 
 tasks.named('test') {
