@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Flicker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .content {
+            text-align: center;
+            padding-top: 150px;
+            font-size: 50px;
+        }
+        .buttons-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .login-btn, .register-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .login-btn:hover, .register-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<div class="buttons-container">
+    <button class="login-btn" onclick="window.location.href='/login'">Logowanie</button>
+    <button class="register-btn" onclick="window.location.href='/register'">Rejestracja</button>
+</div>
+
+<div class="content">
+    <h1>Flicker</h1>
+</div>
+
+</body>
+</html>
