@@ -6,7 +6,7 @@ import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import com.FlickerDomain.flicker.User;
+import com.FlickerDomain.flicker.model.User;
 
 @Component
 public class JwtProvider {
