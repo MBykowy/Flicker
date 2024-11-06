@@ -1,6 +1,6 @@
 package com.FlickerDomain.flicker.service;
 
-import com.FlickerDomain.flicker.model.User;                    // For User entity
+import com.FlickerDomain.flicker.model.User;                // For User entity
 import com.FlickerDomain.flicker.repository.UserRepository;      // For UserRepository interface
 import com.FlickerDomain.flicker.dto.RegisterRequest;            // For RegisterRequest DTO
 import com.FlickerDomain.flicker.dto.LoginRequest;               // For LoginRequest DTO

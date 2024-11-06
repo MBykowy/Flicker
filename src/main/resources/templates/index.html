@@ -30,13 +30,31 @@
         .login-btn:hover, .register-btn:hover {
             background-color: #45a049;
         }
+        .user-info {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .logout-btn {
+            padding: 10px 20px;
+            background-color: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
 
 <div class="buttons-container">
-    <button class="login-btn" onclick="window.location.href='/login'">Logowanie</button>
-    <button class="register-btn" onclick="window.location.href='/register'">Rejestracja</button>
+    <button class="login-btn" th:if="${username == null}" onclick="window.location.href='/login'">Logowanie</button>
+    <button class="register-btn" th:if="${username == null}" onclick="window.location.href='/register'">Rejestracja</button>
+
+    <span class="user-info" th:if="${username != null}" th:text="'Zalogowano jako: ' + ${username}"></span>
+    <button class="logout-btn" th:if="${username != null}" onclick="window.location.href='/logout'">Wyloguj</button>
 </div>
 
 <div class="content">
