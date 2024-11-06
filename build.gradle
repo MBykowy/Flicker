@@ -25,6 +25,13 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'javax.persistence:javax.persistence-api:2.2'
+    implementation 'org.springframework.boot:spring-boot-starter-web'  // For web-related annotations like @RestController
+
+
     // Zależności Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter-web'  // Starter web (REST API)
     implementation 'org.springframework.boot:spring-boot-starter-security'  // Starter bezpieczeństwa
