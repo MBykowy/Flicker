@@ -1,5 +1,4 @@
-package com.FlickerDomain.flicker.model;
-
+package com.FlickerDomain.flicker;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
