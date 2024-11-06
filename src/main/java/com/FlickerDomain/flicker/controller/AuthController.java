@@ -1,11 +1,16 @@
 package com.FlickerDomain.flicker.controller;
 
 import com.FlickerDomain.flicker.service.UserService;
+import com.FlickerDomain.flicker.dto.RegisterRequest;             // For RegisterRequest DTO
+import com.FlickerDomain.flicker.dto.LoginRequest;                // For LoginRequest DTO
+import com.FlickerDomain.flicker.dto.AuthResponse;                // For AuthResponse DTO
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 
 @RestController
 @RequestMapping("/auth")
