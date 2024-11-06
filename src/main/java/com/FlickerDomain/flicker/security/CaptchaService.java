@@ -1,5 +1,7 @@
 package com.FlickerDomain.flicker.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -15,7 +17,9 @@ public class CaptchaService {
 
     private final RestTemplate restTemplate;
 
-    public CaptchaService(RestTemplate restTemplate) {
+    // Constructor-based injection with @Qualifier to specify the bean to inject
+    @Autowired
+    public CaptchaService(@Qualifier("appRestTemplate") RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 

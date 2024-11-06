@@ -21,3 +21,4 @@ public class FlickerApplication {
         System.out.println("User entity is: " + User.class);
     }
 }
+
