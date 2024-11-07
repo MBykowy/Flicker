@@ -18,4 +18,9 @@ public class HomeController {
     public String register() {
         return "register";
     }
+
+    @GetMapping("/success")
+    public String success() {
+        return "success";
+    }
 }

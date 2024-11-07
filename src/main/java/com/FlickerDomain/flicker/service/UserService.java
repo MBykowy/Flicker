@@ -50,4 +50,14 @@ public class UserService {
 
         throw new BadCredentialsException("Invalid credentials");
     }
+
+
+
+    public void registerNewUser(String username, String email, String password) {
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(password); // Nie zapomnij o hashowaniu hasła przed zapisem
+        userRepository.save(user);
+    }
 }
