@@ -7,16 +7,20 @@
 <body>
 
 <h2>Logowanie</h2>
-<form action="/login" method="post">
+<form action="/auth/user-login" method="post">
+  <!-- E-mail -->
   <label for="email">E-mail:</label><br>
   <input type="email" id="email" name="email" required><br><br>
 
+  <!-- Hasło -->
   <label for="password">Hasło:</label><br>
   <input type="password" id="password" name="password" required><br><br>
 
+  <!-- Przycisk -->
   <button type="submit">Zaloguj się</button>
 </form>
 
+<!-- Miejsce na komunikat o błędzie -->
 <p th:if="${error}" th:text="${error}"></p>
 
 </body>

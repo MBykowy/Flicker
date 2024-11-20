@@ -5,14 +5,13 @@ import com.FlickerDomain.flicker.dto.RegisterRequest;             // For Registe
 import com.FlickerDomain.flicker.dto.LoginRequest;                // For LoginRequest DTO
 import com.FlickerDomain.flicker.dto.AuthResponse;                // For AuthResponse DTO
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
 
-@RestController
+@Controller
 @RequestMapping("/auth")
 public class AuthController {
 
@@ -28,9 +27,30 @@ public class AuthController {
         return ResponseEntity.ok("User registered successfully");
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody LoginRequest request) {
-        String token = userService.authenticate(request);
-        return ResponseEntity.ok(new AuthResponse(token));
+//    @PostMapping("/login")
+//    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
+//        boolean isAuthenticated = userService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
+//        if (isAuthenticated) {
+//            return ResponseEntity.ok("Login successful");
+//        } else {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+//        }
+//    }
+
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login";  // Zwraca stronę login.html
     }
+
+    @PostMapping("/user-login")
+    public ResponseEntity<String> login(@RequestParam String email, @RequestParam String password) {
+        boolean isAuthenticated = userService.authenticateByEmail(email, password);
+        if (isAuthenticated) {
+            return ResponseEntity.ok("Login successful");
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
+    }
+
+
 }

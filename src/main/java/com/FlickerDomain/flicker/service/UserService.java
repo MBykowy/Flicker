@@ -11,12 +11,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+
+
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtProvider jwtProvider) {
         this.userRepository = userRepository;
@@ -49,6 +53,36 @@ public class UserService {
         }
 
         throw new BadCredentialsException("Invalid credentials");
+    }
+
+    public boolean authenticate(String username, String password) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            // Sprawdzamy, czy podane hasło pasuje do zahashowanego hasła w bazie
+            return passwordEncoder.matches(password, user.getPassword());
+        }
+
+        return false;
+    }
+
+    public boolean authenticateByEmail(String email, String password) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+
+            // Porównanie hasła wprowadzonego przez użytkownika z hasłem zapisanym w bazie (jako zwykły tekst)
+            boolean passwordMatches = password.equals(user.getPassword());
+
+            System.out.println("Password match: " + passwordMatches);  // Sprawdzenie wyniku porównania
+
+            return passwordMatches;  // Zwrócenie, czy hasło pasuje
+        }
+
+        System.out.println("User not found with email: " + email);
+        return false;  // Jeżeli użytkownik nie został znaleziony
     }
 
 
