@@ -24,6 +24,16 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web' // Web functionality (including @RestController)
     implementation 'org.springframework.boot:spring-boot-starter-security' // Security configuration
     implementation 'org.springframework.boot:spring-boot-starter-validation' // Validation annotations (e.g., @Valid)
+    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+
+// https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.3.5'
+
+// https://mvnrepository.com/artifact/org.mockito/mockito-core
+    testImplementation 'org.mockito:mockito-core:4.8.1'
 
     // Database dependencies
     implementation 'mysql:mysql-connector-java:8.0.33' // MySQL Connector
