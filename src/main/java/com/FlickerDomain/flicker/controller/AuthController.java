@@ -7,6 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/auth")
@@ -41,14 +45,23 @@ public class AuthController {
     }
 
     private boolean validateCaptcha(String captchaResponse) {
-        String secretKey = "6LffRYYqAAAAAJEVVPDGDtu_WPrNaVdSqAfsW1Ij"; // Replace with your secret key
+        String secretKey = "6LffRYYqAAAAAJEVVPDGDtu_WPrNaVdSqAfsW1Ij"; // Twój sekretny klucz
         String verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
 
-        RestTemplate restTemplate = new RestTemplate();
-        String requestUrl = verifyUrl + "?secret=" + secretKey + "&response=" + captchaResponse;
+        WebClient webClient = WebClient.create();
+
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("secret", secretKey);
+        requestBody.put("response", captchaResponse);
 
         try {
-            CaptchaResponse response = restTemplate.postForObject(requestUrl, null, CaptchaResponse.class);
+            CaptchaResponse response = webClient.post()
+                    .uri(verifyUrl)
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .bodyToMono(CaptchaResponse.class)
+                    .block();
+
             System.out.println("Captcha Response: " + response);
             return response != null && response.isSuccess();
         } catch (Exception e) {
