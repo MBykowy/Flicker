@@ -1,5 +1,6 @@
 package com.FlickerDomain.flicker.controller;
 
+import com.FlickerDomain.flicker.dto.RegisterRequest;
 import com.FlickerDomain.flicker.service.UserService;
 import com.FlickerDomain.flicker.dto.LoginRequest;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,12 @@ public class AuthController {
 
     public AuthController(UserService userService) {
         this.userService = userService;
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
+        userService.register(request);
+        return ResponseEntity.ok("User registered successfully");
     }
 
     @PostMapping("/user-login")
