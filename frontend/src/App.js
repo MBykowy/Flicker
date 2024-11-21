@@ -1,24 +1,54 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import "./App.css";
 
 function App() {
+  // Symulacja stanu użytkownika (zalogowany/niezalogowany)
+  const [username, setUsername] = useState(null);
+
+  // Funkcje obsługujące logowanie/rejestrację/wylogowanie
+  const handleLogin = () => {
+    // W prawdziwej aplikacji należy tu umieścić logikę logowania
+    setUsername("Jan Kowalski");
+  };
+
+  const handleRegister = () => {
+    // Przekierowanie do formularza rejestracji
+    alert("Przejdź do rejestracji!");
+  };
+
+  const handleLogout = () => {
+    setUsername(null);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+      <div className="App">
+        <div className="buttons-container">
+          {/* Przyciski logowania/rejestracji */}
+          {!username ? (
+              <>
+                <button className="login-btn" onClick={handleLogin}>
+                  Logowanie
+                </button>
+                <button className="register-btn" onClick={handleRegister}>
+                  Rejestracja
+                </button>
+              </>
+          ) : (
+              <>
+                {/* Informacja o zalogowanym użytkowniku */}
+                <span className="user-info">Zalogowano jako: {username}</span>
+                <button className="logout-btn" onClick={handleLogout}>
+                  Wyloguj
+                </button>
+              </>
+          )}
+        </div>
+
+        {/* Treść główna */}
+        <div className="content">
+          <h1>Flicker</h1>
+        </div>
+      </div>
   );
 }
 
