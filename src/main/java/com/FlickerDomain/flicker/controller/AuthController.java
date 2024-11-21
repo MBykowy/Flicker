@@ -1,16 +1,12 @@
 package com.FlickerDomain.flicker.controller;
 
 import com.FlickerDomain.flicker.service.UserService;
-import com.FlickerDomain.flicker.dto.RegisterRequest;             // For RegisterRequest DTO
-import com.FlickerDomain.flicker.dto.LoginRequest;                // For LoginRequest DTO
-import com.FlickerDomain.flicker.dto.AuthResponse;                // For AuthResponse DTO
-
+import com.FlickerDomain.flicker.dto.LoginRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-
 
 @Controller
 @RequestMapping("/auth")
@@ -22,37 +18,20 @@ public class AuthController {
         this.userService = userService;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
-        userService.register(request);
-        return ResponseEntity.ok("User registered successfully");
-    }
-
-//    @PostMapping("/login")
-//    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
-//        boolean isAuthenticated = userService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
-//        if (isAuthenticated) {
-//            return ResponseEntity.ok("Login successful");
-//        } else {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-//        }
-//    }
-
-    @GetMapping("/login")
-    public String loginPage() {
-        return "login";  // Zwraca stronę login.html
-    }
-
     @PostMapping("/user-login")
-    public ResponseEntity<String> login(@RequestParam String email,
-                                        @RequestParam String password,
-                                        @RequestParam("g-recaptcha-response") String captchaResponse) {
-        // Walidacja CAPTCHA
+    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
+        String email = loginRequest.getEmail();
+        String password = loginRequest.getPassword();
+        String captchaResponse = loginRequest.getCaptchaResponse();
+
+        System.out.println("Email: " + email);
+
+        // Validate CAPTCHA
         if (!validateCaptcha(captchaResponse)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Captcha validation failed");
         }
 
-        // Logika logowania
+        // Login logic
         boolean isAuthenticated = userService.authenticateByEmail(email, password);
         if (isAuthenticated) {
             return ResponseEntity.ok("Login successful");
@@ -62,7 +41,7 @@ public class AuthController {
     }
 
     private boolean validateCaptcha(String captchaResponse) {
-        String secretKey = "6LffRYYqAAAAAJEVVPDGDtu_WPrNaVdSqAfsW1Ij"; // Wstaw swój secret key
+        String secretKey = "6LffRYYqAAAAAJEVVPDGDtu_WPrNaVdSqAfsW1Ij"; // Replace with your secret key
         String verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
 
         RestTemplate restTemplate = new RestTemplate();
@@ -70,8 +49,10 @@ public class AuthController {
 
         try {
             CaptchaResponse response = restTemplate.postForObject(requestUrl, null, CaptchaResponse.class);
+            System.out.println("Captcha Response: " + response);
             return response != null && response.isSuccess();
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
@@ -86,7 +67,12 @@ public class AuthController {
         public void setSuccess(boolean success) {
             this.success = success;
         }
+
+        @Override
+        public String toString() {
+            return "CaptchaResponse{" +
+                    "success=" + success +
+                    '}';
+        }
     }
-
-
 }
