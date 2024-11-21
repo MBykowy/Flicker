@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Logowanie</title>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
 
@@ -16,11 +17,13 @@
   <label for="password">Hasło:</label><br>
   <input type="password" id="password" name="password" required><br><br>
 
+  <!-- CAPTCHA -->
+  <div class="g-recaptcha" data-sitekey="6LffRYYqAAAAAE6o2fZKI2PexiriDMok0AIF8DK5"></div><br>
+
   <!-- Przycisk -->
   <button type="submit">Zaloguj się</button>
 </form>
 
-<!-- Miejsce na komunikat o błędzie -->
 <p th:if="${error}" th:text="${error}"></p>
 
 </body>
