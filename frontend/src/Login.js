@@ -17,7 +17,6 @@ function Login() {
             body: JSON.stringify({ email, password, "g-recaptcha-response": captchaResponse })
         });
         if (response.ok) {
-            const data = await response.json();
             alert("Login successful");
             navigate("/"); // Redirect to home page after successful login
         } else {
@@ -26,21 +25,20 @@ function Login() {
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <label>
-                E-mail:
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </label>
-            <br />
-            <label>
-                Hasło:
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-            </label>
-            <br />
-            <div className="g-recaptcha" data-sitekey="6LffRYYqAAAAAE6o2fZKI2PexiriDMok0AIF8DK5" data-callback={(response) => setCaptchaResponse(response)}></div>
-            <br />
-            <button type="submit">Zaloguj się</button>
-        </form>
+        <div>
+            <h2>Logowanie</h2>
+            <form onSubmit={handleSubmit}>
+                <label htmlFor="email">E-mail:</label><br />
+                <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} required /><br /><br />
+
+                <label htmlFor="password">Hasło:</label><br />
+                <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} required /><br /><br />
+
+                <div className="g-recaptcha" data-sitekey="6LffRYYqAAAAAE6o2fZKI2PexiriDMok0AIF8DK5" data-callback={(response) => setCaptchaResponse(response)}></div><br />
+
+                <button type="submit">Zaloguj się</button>
+            </form>
+        </div>
     );
 }
 
