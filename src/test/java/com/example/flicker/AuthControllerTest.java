@@ -1,4 +1,4 @@
-package com.FlickerDomain.flicker.Testy;
+package com.example.flicker;
 
 import com.FlickerDomain.flicker.controller.AuthController;
 import com.FlickerDomain.flicker.service.UserService;
