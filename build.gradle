@@ -18,41 +18,32 @@ repositories {
 }
 
 dependencies {
-    // Spring Boot Starter dependencies
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // JPA for database interactions
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf' // Thymeleaf for templating
-    implementation 'org.springframework.boot:spring-boot-starter-web' // Web functionality (including @RestController)
-    implementation 'org.springframework.boot:spring-boot-starter-security' // Security configuration
-    implementation 'org.springframework.boot:spring-boot-starter-validation' // Validation annotations (e.g., @Valid)
-    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    dependencies {
+        // Spring Boot Starter dependencies
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework.boot:spring-boot-starter-security'
+        implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-// https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine
-    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
-// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.3.5'
+        // Database dependencies
+        implementation 'mysql:mysql-connector-java:8.0.33'
+        implementation 'org.hibernate:hibernate-core:6.5.3.Final'
+        implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 
-// https://mvnrepository.com/artifact/org.mockito/mockito-core
-    testImplementation 'org.mockito:mockito-core:4.8.1'
+        // JWT dependencies
+        implementation 'io.jsonwebtoken:jjwt:0.9.1'
+        implementation 'com.auth0:java-jwt:2.0.1'
 
-    // Database dependencies
-    implementation 'mysql:mysql-connector-java:8.0.33' // MySQL Connector
-    implementation 'org.hibernate:hibernate-core:6.5.3.Final' // Hibernate for ORM functionality
-    implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1' // Jakarta Annotations
+        // Test dependencies
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'org.mockito:mockito-junit-jupiter:5.1.1'
 
-    // JWT dependencies
-    implementation 'io.jsonwebtoken:jjwt:0.9.1' // JWT for handling tokens
-    implementation 'com.auth0:java-jwt:2.0.1' // Another JWT library
+        // Optional: Include CORS handling or additional features
+        implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    }
 
-    // Test dependencies
-    testImplementation 'org.springframework.boot:spring-boot-starter-test' // Spring Boot Test starter
-    testImplementation 'org.mockito:mockito-core:5.1.1' // Mockito for mocking objects in tests
-    testImplementation 'org.springframework.security:spring-security-test' // Testing with Spring Security
-
-    // CORS handling (if needed for cross-origin API requests)
-    implementation 'org.springframework.boot:spring-boot-starter-webflux' // WebFlux for reactive programming (CORS support)
 }
-
 
 tasks.named('test') {
     useJUnitPlatform()
