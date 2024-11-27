@@ -12,17 +12,27 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const response = await fetch("/auth/check-auth");
-                const isAuthenticated = await response.json();
-                console.log("Authentication status:", isAuthenticated); // Debugging log
-                setIsAuthenticated(isAuthenticated);
-                localStorage.setItem("isAuthenticated", JSON.stringify(isAuthenticated));
+                const response = await fetch("/auth/check-auth", {
+                    method: "GET",
+                    credentials: "include",  // Ensure cookies are sent
+                });
+                if (response.ok) {
+                    const isAuthenticated = await response.json();
+                    console.log("Authentication status:", isAuthenticated); // Debugging log
+                    setIsAuthenticated(isAuthenticated);
+                    localStorage.setItem("isAuthenticated", JSON.stringify(isAuthenticated));
+                } else {
+                    setIsAuthenticated(false);
+                    localStorage.setItem("isAuthenticated", JSON.stringify(false));
+                }
             } catch (error) {
                 console.error("Error checking authentication:", error);
+                setIsAuthenticated(false);
+                localStorage.setItem("isAuthenticated", JSON.stringify(false));
             }
         };
         checkAuth();
-    }, []);
+    }, []); // Empty dependency array so this runs once when component mounts
 
     const login = () => {
         setIsAuthenticated(true);
