@@ -50,7 +50,7 @@ public class AuthController {
         }
     }
 
-    private boolean validateCaptcha(String captchaResponse) {
+    public boolean validateCaptcha(String captchaResponse) {
         String secretKey = "6LffRYYqAAAAAJEVVPDGDtu_WPrNaVdSqAfsW1Ij"; // Twój sekretny klucz
         String verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
 
