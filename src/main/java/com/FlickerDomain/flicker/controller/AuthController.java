@@ -1,16 +1,15 @@
 package com.FlickerDomain.flicker.controller;
 
 import com.FlickerDomain.flicker.dto.RegisterRequest;
-import com.FlickerDomain.flicker.service.UserService;
 import com.FlickerDomain.flicker.dto.LoginRequest;
+import com.FlickerDomain.flicker.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Controller
@@ -55,44 +54,29 @@ public class AuthController {
         String secretKey = "6LffRYYqAAAAAJEVVPDGDtu_WPrNaVdSqAfsW1Ij"; // Twój sekretny klucz
         String verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
 
-        WebClient webClient = WebClient.create();
-
-        Map<String, String> requestBody = new HashMap<>();
-        requestBody.put("secret", secretKey);
-        requestBody.put("response", captchaResponse);
+        // Konfiguracja WebClient z większym limitem dla debugowania dużych odpowiedzi
+        WebClient webClient = WebClient.builder()
+                .exchangeStrategies(ExchangeStrategies.builder()
+                        .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024))
+                        .build())
+                .build();
 
         try {
-            CaptchaResponse response = webClient.post()
+            String response = webClient.post()
                     .uri(verifyUrl)
-                    .bodyValue(requestBody)
+                    .bodyValue("secret=" + secretKey + "&response=" + captchaResponse)
+                    .header("Content-Type", "application/x-www-form-urlencoded")
                     .retrieve()
-                    .bodyToMono(CaptchaResponse.class)
+                    .bodyToMono(String.class)
                     .block();
 
-            System.out.println("Captcha Response: " + response);
-            return response != null && response.isSuccess();
+            System.out.println("Captcha API Response: " + response);
+
+            // Parsowanie odpowiedzi
+            return response != null && response.contains("\"success\": true");
         } catch (Exception e) {
             e.printStackTrace();
             return false;
-        }
-    }
-
-    private static class CaptchaResponse {
-        private boolean success;
-
-        public boolean isSuccess() {
-            return success;
-        }
-
-        public void setSuccess(boolean success) {
-            this.success = success;
-        }
-
-        @Override
-        public String toString() {
-            return "CaptchaResponse{" +
-                    "success=" + success +
-                    '}';
         }
     }
 }

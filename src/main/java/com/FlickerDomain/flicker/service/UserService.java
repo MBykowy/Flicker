@@ -73,8 +73,8 @@ public class UserService {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
 
-            // Porównanie hasła wprowadzonego przez użytkownika z hasłem zapisanym w bazie (jako zwykły tekst)
-            boolean passwordMatches = password.equals(user.getPassword());
+            // Porównanie hasła wprowadzonego przez użytkownika z zahashowanym hasłem
+            boolean passwordMatches = passwordEncoder.matches(password, user.getPassword());
 
             System.out.println("Password match: " + passwordMatches);  // Sprawdzenie wyniku porównania
 

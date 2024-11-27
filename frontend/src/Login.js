@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
+
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [captchaToken, setCaptchaToken] = useState("");
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Inicjalizacja CAPTCHA
         const loadRecaptcha = () => {
             if (window.grecaptcha) {
                 window.grecaptcha.render("captcha", {
@@ -17,7 +18,6 @@ function Login() {
             }
         };
 
-        // Załaduj CAPTCHA po załadowaniu komponentu
         const script = document.createElement("script");
         script.src = "https://www.google.com/recaptcha/api.js";
         script.async = true;
@@ -31,11 +31,9 @@ function Login() {
     }, []);
 
     const handleCaptchaSuccess = (response) => {
-        // Obsługa sukcesu CAPTCHA
+        console.log("CAPTCHA token:", response); // Logowanie tokenu CAPTCHA
         setCaptchaToken(response);
     };
-
-    const [captchaToken, setCaptchaToken] = useState("");
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -54,7 +52,7 @@ function Login() {
                 body: JSON.stringify({
                     email: email,
                     password: password,
-                    captchaResponse: captchaToken, // Przekazanie tokenu CAPTCHA na serwer
+                    captchaResponse: captchaToken,
                 }),
             });
 
@@ -64,6 +62,10 @@ function Login() {
             } else {
                 const errorText = await response.text();
                 alert(`Login failed: ${errorText}`);
+                setCaptchaToken(""); // Zresetuj CAPTCHA po błędzie
+                if (window.grecaptcha) {
+                    window.grecaptcha.reset(); // Reset CAPTCHA w interfejsie
+                }
             }
         } catch (error) {
             console.error("Error during login:", error);
@@ -75,7 +77,6 @@ function Login() {
         <div>
             <h2>Logowanie</h2>
             <form onSubmit={handleSubmit}>
-                {/* Pole E-mail */}
                 <label htmlFor="email">E-mail:</label>
                 <br />
                 <input
@@ -87,8 +88,6 @@ function Login() {
                 />
                 <br />
                 <br />
-
-                {/* Pole Hasło */}
                 <label htmlFor="password">Hasło:</label>
                 <br />
                 <input
@@ -100,12 +99,8 @@ function Login() {
                 />
                 <br />
                 <br />
-
-                {/* CAPTCHA */}
                 <div id="captcha"></div>
                 <br />
-
-                {/* Przycisk logowania */}
                 <button type="submit">Zaloguj się</button>
             </form>
         </div>
