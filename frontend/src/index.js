@@ -5,7 +5,6 @@ import App from "./App";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
-import "./styles/index.css";
 
 ReactDOM.render(
     <Router>

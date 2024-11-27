@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/Login.css";
+import { TextField, Button, Container, Box, Typography } from "@mui/material";
 
 function Login() {
     const [email, setEmail] = useState("");
@@ -12,7 +12,7 @@ function Login() {
         const loadRecaptcha = () => {
             if (window.grecaptcha) {
                 window.grecaptcha.render("captcha", {
-                    sitekey: "6LffRYYqAAAAAE6o2fZKI2PexiriDMok0AIF8DK5", // Twój klucz sitekey
+                    sitekey: "6LffRYYqAAAAAE6o2fZKI2PexiriDMok0AIF8DK5", // Your sitekey
                     callback: handleCaptchaSuccess,
                 });
             }
@@ -31,7 +31,7 @@ function Login() {
     }, []);
 
     const handleCaptchaSuccess = (response) => {
-        console.log("CAPTCHA token:", response); // Logowanie tokenu CAPTCHA
+        console.log("CAPTCHA token:", response); // Log CAPTCHA token
         setCaptchaToken(response);
     };
 
@@ -58,13 +58,13 @@ function Login() {
 
             if (response.ok) {
                 alert("Login successful");
-                navigate("/"); // Przekierowanie po zalogowaniu
+                navigate("/"); // Redirect after login
             } else {
                 const errorText = await response.text();
                 alert(`Login failed: ${errorText}`);
-                setCaptchaToken(""); // Zresetuj CAPTCHA po błędzie
+                setCaptchaToken(""); // Reset CAPTCHA on error
                 if (window.grecaptcha) {
-                    window.grecaptcha.reset(); // Reset CAPTCHA w interfejsie
+                    window.grecaptcha.reset(); // Reset CAPTCHA in UI
                 }
             }
         } catch (error) {
@@ -74,36 +74,35 @@ function Login() {
     };
 
     return (
-        <div>
-            <h2>Logowanie</h2>
-            <form onSubmit={handleSubmit}>
-                <label htmlFor="email">E-mail:</label>
-                <br />
-                <input
-                    type="email"
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-                <br />
-                <br />
-                <label htmlFor="password">Hasło:</label>
-                <br />
-                <input
-                    type="password"
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <br />
-                <br />
-                <div id="captcha"></div>
-                <br />
-                <button type="submit">Zaloguj się</button>
-            </form>
-        </div>
+        <Container maxWidth="sm">
+            <Box display="flex" flexDirection="column" alignItems="center" mt={5}>
+                <Typography variant="h4" mb={2}>Logowanie</Typography>
+                <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+                    <TextField
+                        label="E-mail"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        fullWidth
+                        margin="normal"
+                    />
+                    <TextField
+                        label="Hasło"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        fullWidth
+                        margin="normal"
+                    />
+                    <div id="captcha" style={{ marginTop: 20 }}></div>
+                    <Button type="submit" variant="contained" color="primary" fullWidth style={{ marginTop: 20 }}>
+                        Zaloguj się
+                    </Button>
+                </form>
+            </Box>
+        </Container>
     );
 }
 
