@@ -5,12 +5,11 @@ import com.FlickerDomain.flicker.dto.LoginRequest;
 import com.FlickerDomain.flicker.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
-
-import java.util.Map;
 
 @Controller
 @RequestMapping("/auth")
@@ -50,11 +49,16 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/check-auth")
+    public ResponseEntity<Boolean> checkAuth(Authentication authentication) {
+        return ResponseEntity.ok(authentication != null && authentication.isAuthenticated());
+    }
+
     public boolean validateCaptcha(String captchaResponse) {
-        String secretKey = "6LffRYYqAAAAAJEVVPDGDtu_WPrNaVdSqAfsW1Ij"; // Twój sekretny klucz
+        String secretKey = "6LffRYYqAAAAAJEVVPDGDtu_WPrNaVdSqAfsW1Ij"; // Your secret key
         String verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
 
-        // Konfiguracja WebClient z większym limitem dla debugowania dużych odpowiedzi
+        // Configure WebClient with a larger limit for debugging large responses
         WebClient webClient = WebClient.builder()
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024))
@@ -72,7 +76,7 @@ public class AuthController {
 
             System.out.println("Captcha API Response: " + response);
 
-            // Parsowanie odpowiedzi
+            // Parse response
             return response != null && response.contains("\"success\": true");
         } catch (Exception e) {
             e.printStackTrace();

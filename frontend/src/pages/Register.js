@@ -1,6 +1,16 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { TextField, Button, Container, Box, Typography } from "@mui/material";
+import { TextField, Button, Container, Box, Typography, Paper, Avatar } from "@mui/material";
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { styled } from "@mui/system";
+
+const FadeInContainer = styled(Container)({
+    animation: 'fadeIn 1s ease-in-out',
+    '@keyframes fadeIn': {
+        '0%': { opacity: 0 },
+        '100%': { opacity: 1 },
+    },
+});
 
 function Register() {
     const [username, setUsername] = useState("");
@@ -26,42 +36,50 @@ function Register() {
     };
 
     return (
-        <Container maxWidth="sm">
-            <Box display="flex" flexDirection="column" alignItems="center" mt={5}>
-                <Typography variant="h4" mb={2}>Rejestracja</Typography>
-                <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-                    <TextField
-                        label="Nazwa użytkownika"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        required
-                        fullWidth
-                        margin="normal"
-                    />
-                    <TextField
-                        label="E-mail"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        fullWidth
-                        margin="normal"
-                    />
-                    <TextField
-                        label="Hasło"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        fullWidth
-                        margin="normal"
-                    />
-                    <Button type="submit" variant="contained" color="primary" fullWidth style={{ marginTop: 20 }}>
-                        Zarejestruj się
-                    </Button>
-                </form>
-            </Box>
-        </Container>
+        <FadeInContainer component="main" maxWidth="xs">
+            <Paper elevation={6} style={{ padding: '20px', marginTop: '50px' }}>
+                <Box display="flex" flexDirection="column" alignItems="center">
+                    <Avatar style={{ margin: '10px', backgroundColor: 'secondary.main' }}>
+                        <LockOutlinedIcon />
+                    </Avatar>
+                    <Typography variant="h5">Rejestracja</Typography>
+                    <form onSubmit={handleSubmit} style={{ width: '100%', marginTop: '20px' }}>
+                        <TextField
+                            label="Nazwa użytkownika"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                            fullWidth
+                            margin="normal"
+                            variant="outlined"
+                        />
+                        <TextField
+                            label="E-mail"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            fullWidth
+                            margin="normal"
+                            variant="outlined"
+                        />
+                        <TextField
+                            label="Hasło"
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            fullWidth
+                            margin="normal"
+                            variant="outlined"
+                        />
+                        <Button type="submit" variant="contained" color="primary" fullWidth style={{ marginTop: '20px' }}>
+                            Zarejestruj się
+                        </Button>
+                    </form>
+                </Box>
+            </Paper>
+        </FadeInContainer>
     );
 }
 

@@ -24,17 +24,17 @@ const App = () => {
         >
             <img src="https://gratisography.com/wp-content/uploads/2024/10/gratisography-cool-cat-800x525.jpg" alt="Fancy Image" style={{ width: '450px', marginBottom: '20px' }} />
             <Typography variant="h2" component="h1" gutterBottom>
-                Welcome to Flicker
+               Witaj na Flicker!
             </Typography>
             <Typography variant="h5" component="h2" gutterBottom>
-                The only social platform for you will ever need
+                Jeśli jesteś zainteresowany, zaloguj się lub zarejestruj!
             </Typography>
             <Box mt={4}>
                 <Button variant="contained" color="primary" component={Link} to="/login">
-                    Login
+                    Logowanie
                 </Button>
                 <Button variant="outlined" color="primary" component={Link} to="/register" style={{ marginLeft: 16 }}>
-                    Register
+                    Rejestracja
                 </Button>
             </Box>
         </AnimatedBox>

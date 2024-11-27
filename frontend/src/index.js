@@ -1,21 +1,38 @@
 import React from "react";
-import { createRoot } from "react-dom/client";
+import ReactDOM from "react-dom";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import App from "./App";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import HomePage from ".//App";
+import MainPage from "./pages/MainPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Profile from "./pages/Profile";
 
-const container = document.getElementById("root");
-const root = createRoot(container);
+const App = () => {
+    return (
+        <AuthProvider>
+            <Router>
+                <Routes>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="*" element={<ProtectedRoute />} />
+                </Routes>
+            </Router>
+        </AuthProvider>
+    );
+};
 
-root.render(
-    <Router>
-        <Routes>
-            <Route path="/" element={<App />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/profile" element={<Profile />} />
-        </Routes>
-    </Router>
+const ProtectedRoute = () => {
+    const { isAuthenticated } = useAuth();
+    console.log("Is Authenticated:", isAuthenticated); // Debugging log
+
+    return isAuthenticated ? <MainPage /> : <HomePage />;
+};
+
+ReactDOM.render(
+    <React.StrictMode>
+        <App />
+    </React.StrictMode>,
+    document.getElementById('root')
 );
+
+export default App;
