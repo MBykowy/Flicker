@@ -17,7 +17,7 @@ function App() {
         if (response.ok) {
             const data = await response.json();
             setUsername(data.username);
-            navigate("/"); // Redirect to home page after login
+            navigate("/");
         } else {
             alert("Login failed");
         }
@@ -33,7 +33,7 @@ function App() {
         });
         if (response.ok) {
             alert("Registration successful");
-            navigate("/"); // Redirect to home page after registration
+            navigate("/");
         } else {
             alert("Registration failed");
         }
@@ -41,7 +41,7 @@ function App() {
 
     const handleLogout = () => {
         setUsername(null);
-        navigate("/"); // Redirect to home page after logout
+        navigate("/");
     };
 
     return (
@@ -61,6 +61,9 @@ function App() {
                         <span className="user-info">Zalogowano jako: {username}</span>
                         <button className="logout-btn" onClick={handleLogout}>
                             Wyloguj
+                        </button>
+                        <button className="profile-btn" onClick={() => navigate("/profile")}>
+                            Profile
                         </button>
                     </>
                 )}

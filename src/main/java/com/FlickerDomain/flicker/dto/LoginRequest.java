@@ -29,4 +29,6 @@ public class LoginRequest {
     public void setCaptchaResponse(String captchaResponse) {
         this.captchaResponse = captchaResponse;
     }
+
+
 }
