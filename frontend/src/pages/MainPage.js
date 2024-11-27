@@ -32,7 +32,7 @@ const MainPage = () => {
                 gutterBottom
                 style={{ animation: 'fadeIn 4s ease-in-out' }}
             >
-                You are now logged in.
+                You are now logged in
             </Typography>
         </Box>
     );
