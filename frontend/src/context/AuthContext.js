@@ -39,9 +39,24 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem("isAuthenticated", JSON.stringify(true));
     };
 
-    const logout = () => {
-        setIsAuthenticated(false);
-        localStorage.removeItem("isAuthenticated");
+    const logout = async () => {
+        try {
+            // Optional: Send a request to the server to handle server-side logout
+            const response = await fetch("/auth/logout", {
+                method: "POST",
+                credentials: "include", // Ensures cookies are sent (for session)
+            });
+
+            if (response.ok) {
+                // If logout was successful on the server, clear the client-side state
+                setIsAuthenticated(false);
+                localStorage.removeItem("isAuthenticated");
+            } else {
+                console.error("Error logging out on server side");
+            }
+        } catch (error) {
+            console.error("Error logging out:", error);
+        }
     };
 
     return (
