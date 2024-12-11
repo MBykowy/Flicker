@@ -2,16 +2,16 @@ import React from "react";
 import { Box, Typography, Button } from "@mui/material";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
-import {useAuth} from "../context/AuthContext";
-
+import { useAuth } from "../context/AuthContext";
+import { Link } from "react-router-dom";
 
 const MainPage = () => {
     const { width, height } = useWindowSize();
-    const { logout } = useAuth(); // Funkcja do wylogowania
+    const { logout } = useAuth();
 
     const handleLogout = () => {
-        logout(); // Wylogowanie użytkownika
-        window.location.reload(); // Odświeżenie strony, aby odzwierciedlić zmianę stanu
+        logout();
+        window.location.reload();
     };
 
     return (
@@ -27,7 +27,21 @@ const MainPage = () => {
         >
             <Confetti width={width} height={height} />
 
-            {/* Przycisk wylogowywania w prawym górnym rogu */}
+            <Button
+                variant="contained"
+                color="secondary"
+                component={Link}
+                to="/profile"
+                style={{
+                    position: 'absolute',
+                    top: 20,
+                    left: 20,
+                    zIndex: 10
+                }}
+            >
+                Profile
+            </Button>
+
             <Button
                 variant="contained"
                 color="secondary"

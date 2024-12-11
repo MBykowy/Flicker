@@ -36,6 +36,7 @@ const App = () => {
                 <Button variant="outlined" color="primary" component={Link} to="/register" style={{ marginLeft: 16 }}>
                     Rejestracja
                 </Button>
+
             </Box>
         </AnimatedBox>
     );

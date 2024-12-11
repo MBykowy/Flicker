@@ -6,6 +6,7 @@ import HomePage from ".//App";
 import MainPage from "./pages/MainPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Profile from "./pages/Profile";
 
 const App = () => {
     return (
@@ -14,6 +15,7 @@ const App = () => {
                 <Routes>
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
+                    <Route path="/profile" element={<Profile />} />
                     <Route path="*" element={<ProtectedRoute />} />
                 </Routes>
             </Router>

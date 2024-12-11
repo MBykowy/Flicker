@@ -84,7 +84,10 @@ public class UserService {
         System.out.println("User not found with email: " + email);
         return false;  // Jeżeli użytkownik nie został znaleziony
     }
-
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
 
 
     public void registerNewUser(String username, String email, String password) {

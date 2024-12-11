@@ -2,6 +2,7 @@ package com.FlickerDomain.flicker.controller;
 
 import com.FlickerDomain.flicker.dto.RegisterRequest;
 import com.FlickerDomain.flicker.dto.LoginRequest;
+import com.FlickerDomain.flicker.model.User;
 import com.FlickerDomain.flicker.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -68,6 +69,11 @@ public class AuthController {
             session.invalidate();  // Invalidate the session to log out the user
         }
         return ResponseEntity.ok("Logged out successfully");
+    }
+    @GetMapping("/user-details")
+    public ResponseEntity<User> getUserDetails(@RequestParam String email) {
+        User user = userService.getUserByEmail(email);
+        return ResponseEntity.ok(user);
     }
 
     // Walidacja CAPTCHA
