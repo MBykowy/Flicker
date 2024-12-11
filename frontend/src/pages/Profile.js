@@ -1,5 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Avatar, TextField, Button } from "@mui/material";
+import {
+    Box,
+    Typography,
+    Avatar,
+    TextField,
+    Button,
+    Paper,
+    Container,
+    Grid,
+    IconButton,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions
+} from "@mui/material";
+import {
+    Edit as EditIcon,
+    SaveAlt as SaveIcon,
+    Close as CloseIcon
+} from "@mui/icons-material";
 import { Link } from "react-router-dom";
 
 const Profile = () => {
@@ -8,7 +27,10 @@ const Profile = () => {
     const [error, setError] = useState(null);
     const [isEditingPicture, setIsEditingPicture] = useState(false);
     const [newPictureUrl, setNewPictureUrl] = useState("");
-    const [isHovered, setIsHovered] = useState(false); // Stan do zarządzania hoverem na avatarze
+    const [isEditingBio, setIsEditingBio] = useState(false);
+    const [newBio, setNewBio] = useState("");
+    const [isEditingUsername, setIsEditingUsername] = useState(false);
+    const [newUsername, setNewUsername] = useState("");
 
     useEffect(() => {
         const getEmailFromCookies = () => {
@@ -25,29 +47,10 @@ const Profile = () => {
             return;
         }
 
-        // Fetching user details using the email from cookies
         fetch(`/auth/user-details?email=${email}`)
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
+            .then((response) => response.json())
             .then((data) => {
-                // Ensure the email in the response matches the email in cookies
-                if (data.email !== email) {
-                    setError("Email mismatch between cookies and database.");
-                    setLoading(false);
-                    return;
-                }
-
-                // Populate user state with data received from the backend
-                setUser({
-                    username: data.username || "No Username Provided",  // Using 'username' from the backend
-                    email: data.email || "No Email Provided",
-                    bio: data.bio || "",
-                    picture: data.picture || "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Placeholder_no_text.svg/150px-Placeholder_no_text.svg.png", // Default picture
-                });
+                setUser(data);
                 setLoading(false);
             })
             .catch((err) => {
@@ -56,133 +59,271 @@ const Profile = () => {
             });
     }, []);
 
-    const handlePictureEdit = () => {
-        setIsEditingPicture(true);
-        setNewPictureUrl(user.picture); // Set current picture as default value
-    };
-
-    const handlePictureChange = () => {
-        if (newPictureUrl && newPictureUrl !== user.picture) { // Sprawdzamy, czy URL jest różny od obecnego
-            fetch(`/auth/update-picture?email=${user.email}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ picture: newPictureUrl }),
+    const updatePicture = () => {
+        fetch("/auth/update-picture", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: user.email, picture: newPictureUrl }),
+        })
+            .then((response) => response.json())
+            .then(() => {
+                setUser((prevUser) => ({ ...prevUser, picture: newPictureUrl }));
+                setNewPictureUrl("");
+                setIsEditingPicture(false);
             })
-                .then((response) => response.json())
-                .then((data) => {
-                    if (data.success) {
-                        setUser({ ...user, picture: newPictureUrl });
-                        setIsEditingPicture(false); // Po zapisaniu wychodzimy z trybu edycji
-                    } else {
-                        setError("Failed to update picture.");
-                    }
-                })
-                .catch((err) => setError("Error updating picture"));
-        } else {
-            // Jeśli URL jest taki sam, nic się nie dzieje, ale i tak wychodzimy z trybu edycji
-            setIsEditingPicture(false); // Wyłączenie trybu edycji, gdy nie dokonano zmian
-            console.log("The picture URL has not been changed.");
-        }
+            .catch(() => setError("Failed to update picture."));
     };
 
-    if (loading) return <Typography>Loading...</Typography>;
-    if (error) return <Typography color="error">{error}</Typography>;
+    const updateBio = () => {
+        fetch("/auth/update-bio", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: user.email, bio: newBio }),
+        })
+            .then((response) => response.json())
+            .then(() => {
+                setUser((prevUser) => ({ ...prevUser, bio: newBio }));
+                setNewBio("");
+                setIsEditingBio(false);
+            })
+            .catch(() => setError("Failed to update bio."));
+    };
+
+    const updateUsername = () => {
+        fetch("/auth/update-username", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: user.email, username: newUsername }),
+        })
+            .then((response) => response.json())
+            .then(() => {
+                setUser((prevUser) => ({ ...prevUser, username: newUsername }));
+                setNewUsername("");
+                setIsEditingUsername(false);
+            })
+            .catch(() => setError("Failed to update username."));
+    };
+
+    if (loading) return (
+        <Container maxWidth="sm">
+            <Typography variant="h6" align="center" sx={{ mt: 4 }}>
+                Loading...
+            </Typography>
+        </Container>
+    );
+
+    if (error) return (
+        <Container maxWidth="sm">
+            <Typography variant="h6" color="error" align="center" sx={{ mt: 4 }}>
+                Error: {error}
+            </Typography>
+        </Container>
+    );
 
     return (
-        <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="center"
-            minHeight="100vh"
-            bgcolor="background.default"
-            p={4}
-        >
-            <Box
-                position="relative"
-                display="flex"
-                flexDirection="column"
-                alignItems="center"
-                justifyContent="center"
-                onMouseEnter={() => setIsHovered(true)} // Zmienia stan na true, gdy najedziesz na avatar
-                onMouseLeave={() => setIsHovered(false)} // Zmienia stan na false, gdy opuścisz avatar
-            >
-                <Avatar
-                    alt="Profile Picture"
-                    src={user.picture}
-                    sx={{ width: 150, height: 150, mb: 2 }}
-                />
-                {isEditingPicture ? (
-                    <Box>
-                        <TextField
-                            label="New Picture URL"
-                            value={newPictureUrl}
-                            onChange={(e) => setNewPictureUrl(e.target.value)}
-                            fullWidth
-                            variant="outlined"
-                            sx={{ mb: 2 }}
-                        />
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={handlePictureChange}
-                        >
-                            Save Picture
-                        </Button>
-                    </Box>
-                ) : (
-                    isHovered && ( // Przycisk pojawia się tylko gdy jest hover na avatarze
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            sx={{
-                                position: "absolute",
-                                top: 10,
-                                right: 10,
-                                zIndex: 1,
-                            }}
-                            onClick={handlePictureEdit}
-                        >
-                            Edit
-                        </Button>
-                    )
-                )}
-            </Box>
-            <Typography variant="h4" component="h1" gutterBottom>
-                {user.username} {/* Wyświetlamy username pobrany z bazy danych */}
-            </Typography>
-            <Typography variant="h6" component="h2" gutterBottom>
-                {user.email}
-            </Typography>
-            <TextField
-                label="Bio"
-                multiline
-                rows={4}
-                variant="outlined"
-                fullWidth
-                sx={{ mb: 4 }}
-                value={user.bio}
-                disabled
-            />
-            <Box
-                width="100%"
-                height="300px"
-                bgcolor="grey.200"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                mb={4}
-            >
-                <Typography variant="h6" color="textSecondary">
-                    Posts will be displayed here
-                </Typography>
-            </Box>
-            <Button variant="contained" color="primary" component={Link} to="/">
-                Go to Main Page
-            </Button>
-        </Box>
+        <Container maxWidth="sm">
+            <Paper elevation={3} sx={{ p: 4, mt: 4, borderRadius: 2 }}>
+                <Grid container spacing={3} alignItems="center" direction="column">
+                    {/* Profile Picture */}
+                    <Grid item>
+                        <Box position="relative">
+                            <Avatar
+                                src={user.picture}
+                                sx={{
+                                    width: 150,
+                                    height: 150,
+                                    border: '4px solid',
+                                    borderColor: 'primary.main'
+                                }}
+                            />
+                            <IconButton
+                                color="primary"
+                                sx={{
+                                    position: 'absolute',
+                                    bottom: 0,
+                                    right: 0,
+                                    bgcolor: 'background.paper',
+                                    '&:hover': { bgcolor: 'action.hover' }
+                                }}
+                                onClick={() => setIsEditingPicture(true)}
+                            >
+                                <EditIcon />
+                            </IconButton>
+                        </Box>
+                    </Grid>
+
+                    {/* Username */}
+                    <Grid item container justifyContent="center" alignItems="center" spacing={1}>
+                        <Grid item>
+                            <Typography variant="h5" color="text.primary">
+                                {user.username || "No username set"}
+                            </Typography>
+                        </Grid>
+                        <Grid item>
+                            <IconButton
+                                color="primary"
+                                size="small"
+                                onClick={() => setIsEditingUsername(true)}
+                            >
+                                <EditIcon fontSize="small" />
+                            </IconButton>
+                        </Grid>
+                    </Grid>
+
+                    {/* Email */}
+                    <Grid item>
+                        <Typography variant="body1" color="text.secondary">
+                            {user.email}
+                        </Typography>
+                    </Grid>
+
+                    {/* Bio */}
+                    <Grid item container justifyContent="center" alignItems="center" spacing={1}>
+                        <Grid item>
+                            <Typography
+                                variant="body1"
+                                color="text.secondary"
+                                align="center"
+                            >
+                                {user.bio || "No bio added yet"}
+                            </Typography>
+                        </Grid>
+                        <Grid item>
+                            <IconButton
+                                color="primary"
+                                size="small"
+                                onClick={() => setIsEditingBio(true)}
+                            >
+                                <EditIcon fontSize="small" />
+                            </IconButton>
+                        </Grid>
+                    </Grid>
+
+                    {/* Dialogs for Editing */}
+                    <Dialog
+                        open={isEditingPicture}
+                        onClose={() => setIsEditingPicture(false)}
+                        fullWidth
+                        maxWidth="xs"
+                    >
+                        <DialogTitle>
+                            Update Profile Picture
+                            <IconButton
+                                onClick={() => setIsEditingPicture(false)}
+                                sx={{ position: 'absolute', right: 8, top: 8 }}
+                            >
+                                <CloseIcon />
+                            </IconButton>
+                        </DialogTitle>
+                        <DialogContent>
+                            <TextField
+                                fullWidth
+                                value={newPictureUrl}
+                                onChange={(e) => setNewPictureUrl(e.target.value)}
+                                label="New Picture URL"
+                                variant="outlined"
+                                margin="normal"
+                            />
+                        </DialogContent>
+                        <DialogActions>
+                            <Button
+                                onClick={updatePicture}
+                                color="primary"
+                                startIcon={<SaveIcon />}
+                            >
+                                Save
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+
+                    <Dialog
+                        open={isEditingUsername}
+                        onClose={() => setIsEditingUsername(false)}
+                        fullWidth
+                        maxWidth="xs"
+                    >
+                        <DialogTitle>
+                            Update Username
+                            <IconButton
+                                onClick={() => setIsEditingUsername(false)}
+                                sx={{ position: 'absolute', right: 8, top: 8 }}
+                            >
+                                <CloseIcon />
+                            </IconButton>
+                        </DialogTitle>
+                        <DialogContent>
+                            <TextField
+                                fullWidth
+                                value={newUsername}
+                                onChange={(e) => setNewUsername(e.target.value)}
+                                label="New Username"
+                                variant="outlined"
+                                margin="normal"
+                            />
+                        </DialogContent>
+                        <DialogActions>
+                            <Button
+                                onClick={updateUsername}
+                                color="primary"
+                                startIcon={<SaveIcon />}
+                            >
+                                Save
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+
+                    <Dialog
+                        open={isEditingBio}
+                        onClose={() => setIsEditingBio(false)}
+                        fullWidth
+                        maxWidth="xs"
+                    >
+                        <DialogTitle>
+                            Update Bio
+                            <IconButton
+                                onClick={() => setIsEditingBio(false)}
+                                sx={{ position: 'absolute', right: 8, top: 8 }}
+                            >
+                                <CloseIcon />
+                            </IconButton>
+                        </DialogTitle>
+                        <DialogContent>
+                            <TextField
+                                fullWidth
+                                value={newBio}
+                                onChange={(e) => setNewBio(e.target.value)}
+                                label="New Bio"
+                                variant="outlined"
+                                multiline
+                                rows={4}
+                                margin="normal"
+                            />
+                        </DialogContent>
+                        <DialogActions>
+                            <Button
+                                onClick={updateBio}
+                                color="primary"
+                                startIcon={<SaveIcon />}
+                            >
+                                Save
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+
+                    {/* Edit Profile Link */}
+                    <Grid item>
+                        <Link to="/edit-profile" style={{ textDecoration: 'none' }}>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                            >
+                                Edit Profile
+                            </Button>
+                        </Link>
+                    </Grid>
+                </Grid>
+            </Paper>
+        </Container>
     );
 };
 

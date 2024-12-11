@@ -106,6 +106,23 @@ public class AuthController {
         return ResponseEntity.ok(user);
     }
 
+    @PostMapping("/update-username")
+    public ResponseEntity<?> updateUsername(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String username = request.get("username");
+        userService.updateUserUsername(email, username);
+        return ResponseEntity.ok(Collections.singletonMap("success", true));
+    }
+
+    @PostMapping("/update-bio")
+    public ResponseEntity<?> updateBio(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String bio = request.get("bio");
+        userService.updateUserBio(email, bio);
+        return ResponseEntity.ok(Collections.singletonMap("success", true));
+    }
+
+
     // Walidacja CAPTCHA
     public boolean validateCaptcha(String captchaResponse) {
         String secretKey = "6LffRYYqAAAAAJEVVPDGDtu_WPrNaVdSqAfsW1Ij"; // Your secret key
