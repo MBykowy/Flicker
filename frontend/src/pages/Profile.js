@@ -3,13 +3,15 @@ import { Box, Typography, Avatar, TextField, Button } from "@mui/material";
 import { Link } from "react-router-dom";
 
 const Profile = () => {
-    const [user, setUser] = useState({ name: "", email: "", bio: "" });
+    const [user, setUser] = useState({ username: "", email: "", bio: "", picture: "" });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isEditingPicture, setIsEditingPicture] = useState(false);
+    const [newPictureUrl, setNewPictureUrl] = useState("");
+    const [isHovered, setIsHovered] = useState(false); // Stan do zarządzania hoverem na avatarze
 
     useEffect(() => {
         const getEmailFromCookies = () => {
-            console.log("Current cookies:", document.cookie); // Log cookies for debugging
             const cookies = document.cookie.split("; ");
             const emailCookie = cookies.find((cookie) => cookie.startsWith("email="));
             return emailCookie ? decodeURIComponent(emailCookie.split("=")[1]) : null;
@@ -23,6 +25,7 @@ const Profile = () => {
             return;
         }
 
+        // Fetching user details using the email from cookies
         fetch(`/auth/user-details?email=${email}`)
             .then((response) => {
                 if (!response.ok) {
@@ -31,10 +34,19 @@ const Profile = () => {
                 return response.json();
             })
             .then((data) => {
+                // Ensure the email in the response matches the email in cookies
+                if (data.email !== email) {
+                    setError("Email mismatch between cookies and database.");
+                    setLoading(false);
+                    return;
+                }
+
+                // Populate user state with data received from the backend
                 setUser({
-                    name: data.name || "No Name Provided",
+                    username: data.username || "No Username Provided",  // Using 'username' from the backend
                     email: data.email || "No Email Provided",
-                    bio: data.bio || "", // Assuming bio is included in response
+                    bio: data.bio || "",
+                    picture: data.picture || "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Placeholder_no_text.svg/150px-Placeholder_no_text.svg.png", // Default picture
                 });
                 setLoading(false);
             })
@@ -43,6 +55,37 @@ const Profile = () => {
                 setLoading(false);
             });
     }, []);
+
+    const handlePictureEdit = () => {
+        setIsEditingPicture(true);
+        setNewPictureUrl(user.picture); // Set current picture as default value
+    };
+
+    const handlePictureChange = () => {
+        if (newPictureUrl && newPictureUrl !== user.picture) { // Sprawdzamy, czy URL jest różny od obecnego
+            fetch(`/auth/update-picture?email=${user.email}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ picture: newPictureUrl }),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        setUser({ ...user, picture: newPictureUrl });
+                        setIsEditingPicture(false); // Po zapisaniu wychodzimy z trybu edycji
+                    } else {
+                        setError("Failed to update picture.");
+                    }
+                })
+                .catch((err) => setError("Error updating picture"));
+        } else {
+            // Jeśli URL jest taki sam, nic się nie dzieje, ale i tak wychodzimy z trybu edycji
+            setIsEditingPicture(false); // Wyłączenie trybu edycji, gdy nie dokonano zmian
+            console.log("The picture URL has not been changed.");
+        }
+    };
 
     if (loading) return <Typography>Loading...</Typography>;
     if (error) return <Typography color="error">{error}</Typography>;
@@ -57,13 +100,58 @@ const Profile = () => {
             bgcolor="background.default"
             p={4}
         >
-            <Avatar
-                alt="Profile Picture"
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Placeholder_no_text.svg/150px-Placeholder_no_text.svg.png"
-                sx={{ width: 150, height: 150, mb: 2 }}
-            />
+            <Box
+                position="relative"
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                justifyContent="center"
+                onMouseEnter={() => setIsHovered(true)} // Zmienia stan na true, gdy najedziesz na avatar
+                onMouseLeave={() => setIsHovered(false)} // Zmienia stan na false, gdy opuścisz avatar
+            >
+                <Avatar
+                    alt="Profile Picture"
+                    src={user.picture}
+                    sx={{ width: 150, height: 150, mb: 2 }}
+                />
+                {isEditingPicture ? (
+                    <Box>
+                        <TextField
+                            label="New Picture URL"
+                            value={newPictureUrl}
+                            onChange={(e) => setNewPictureUrl(e.target.value)}
+                            fullWidth
+                            variant="outlined"
+                            sx={{ mb: 2 }}
+                        />
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={handlePictureChange}
+                        >
+                            Save Picture
+                        </Button>
+                    </Box>
+                ) : (
+                    isHovered && ( // Przycisk pojawia się tylko gdy jest hover na avatarze
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            sx={{
+                                position: "absolute",
+                                top: 10,
+                                right: 10,
+                                zIndex: 1,
+                            }}
+                            onClick={handlePictureEdit}
+                        >
+                            Edit
+                        </Button>
+                    )
+                )}
+            </Box>
             <Typography variant="h4" component="h1" gutterBottom>
-                {user.name}
+                {user.username} {/* Wyświetlamy username pobrany z bazy danych */}
             </Typography>
             <Typography variant="h6" component="h2" gutterBottom>
                 {user.email}
@@ -76,7 +164,7 @@ const Profile = () => {
                 fullWidth
                 sx={{ mb: 4 }}
                 value={user.bio}
-                disabled // Assuming this field is not editable here
+                disabled
             />
             <Box
                 width="100%"
@@ -91,12 +179,7 @@ const Profile = () => {
                     Posts will be displayed here
                 </Typography>
             </Box>
-            <Button
-                variant="contained"
-                color="primary"
-                component={Link}
-                to="/"
-            >
+            <Button variant="contained" color="primary" component={Link} to="/">
                 Go to Main Page
             </Button>
         </Box>

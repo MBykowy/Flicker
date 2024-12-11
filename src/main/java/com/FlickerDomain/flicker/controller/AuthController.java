@@ -54,10 +54,10 @@ public class AuthController {
 
             // Create a cookie with the user's email
             Cookie emailCookie = new Cookie("email", email);
-            emailCookie.setHttpOnly(true); // Prevent JavaScript access
-            emailCookie.setSecure(true); // Send only over HTTPS
-            emailCookie.setMaxAge(7 * 24 * 60 * 60); // 7 days expiration
-            emailCookie.setPath("/"); // Make cookie available to the entire site
+            //emailCookie.setHttpOnly(true); // Zabezpiecza ciasteczko przed dostępem z JavaScript
+            emailCookie.setSecure(false); // Tylko przez HTTPS
+            emailCookie.setMaxAge(7 * 24 * 60 * 60); // 7 dni
+            emailCookie.setPath("/"); // Dostępność w całej witrynie
             response.addCookie(emailCookie);
 
             return ResponseEntity.ok("Login successful");

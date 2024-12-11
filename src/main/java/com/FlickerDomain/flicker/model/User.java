@@ -18,6 +18,7 @@ public class User implements Serializable {
     private String email;
     private String password;
     private String bio;
+    private String picture;
 
     // Getters and Setters
     public Long getId() {
@@ -59,4 +60,8 @@ public class User implements Serializable {
     public void setBio(String bio) {
         this.bio = bio;
     }
+
+    public String getPicture(){return picture;}
+
+    public void setPicture(String picture){this.picture = picture;}
 }
