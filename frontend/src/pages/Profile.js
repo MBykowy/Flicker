@@ -1,8 +1,41 @@
-import React from "react";
+// Import necessary libraries
+import React, { useState, useEffect } from "react";
 import { Box, Typography, Avatar, TextField, Button } from "@mui/material";
 import { Link } from "react-router-dom";
 
 const Profile = () => {
+    const [user, setUser] = useState({ name: "", email: "", bio: "" });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        // Replace this email with the authenticated user's email in a real app
+        const email = "johndoe@example.com";
+
+        fetch(`/auth/user-details?email=${email}`)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then((data) => {
+                setUser({
+                    name: data.name,
+                    email: data.email,
+                    bio: data.bio || "", // Assuming bio is included in response
+                });
+                setLoading(false);
+            })
+            .catch((err) => {
+                setError("Failed to load user details.");
+                setLoading(false);
+            });
+    }, []);
+
+    if (loading) return <Typography>Loading...</Typography>;
+    if (error) return <Typography color="error">{error}</Typography>;
+
     return (
         <Box
             display="flex"
@@ -19,10 +52,10 @@ const Profile = () => {
                 sx={{ width: 150, height: 150, mb: 2 }}
             />
             <Typography variant="h4" component="h1" gutterBottom>
-                John Doe
+                {user.name}
             </Typography>
             <Typography variant="h6" component="h2" gutterBottom>
-                johndoe@example.com
+                {user.email}
             </Typography>
             <TextField
                 label="Bio"
@@ -31,6 +64,8 @@ const Profile = () => {
                 variant="outlined"
                 fullWidth
                 sx={{ mb: 4 }}
+                value={user.bio}
+                disabled // Assuming this field is not editable here
             />
             <Box
                 width="100%"
@@ -58,3 +93,4 @@ const Profile = () => {
 };
 
 export default Profile;
+// This component fetches user details from the server and displays them on the page. It also includes a button to navigate back to the main page.
