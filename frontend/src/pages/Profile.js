@@ -9,6 +9,8 @@ const Profile = () => {
     const [isEditingPicture, setIsEditingPicture] = useState(false);
     const [newPictureUrl, setNewPictureUrl] = useState("");
     const [isHovered, setIsHovered] = useState(false); // Stan do zarządzania hoverem na avatarze
+    const [isEditingBio, setIsEditingBio] = useState(false); // Stan edytowania bio
+    const [newBio, setNewBio] = useState(""); // Stan dla nowego bio
 
     useEffect(() => {
         const getEmailFromCookies = () => {
@@ -48,6 +50,7 @@ const Profile = () => {
                     bio: data.bio || "",
                     picture: data.picture || "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Placeholder_no_text.svg/150px-Placeholder_no_text.svg.png", // Default picture
                 });
+                setNewBio(data.bio || ""); // Set the current bio in the newBio state
                 setLoading(false);
             })
             .catch((err) => {
@@ -86,6 +89,45 @@ const Profile = () => {
             console.log("The picture URL has not been changed.");
         }
     };
+
+    const handleBioEdit = () => {
+        setIsEditingBio(true);
+        setNewBio(user.bio); // Set the current bio as the default value
+    };
+
+    const handleBioSave = () => {
+        if (newBio !== user.bio) {
+            fetch(`/auth/update-bio?email=${user.email}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ bio: newBio }),
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`Failed to update bio: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (data.success) {
+                        setUser({ ...user, bio: newBio });
+                        setIsEditingBio(false); // Exit edit mode after saving
+                    } else {
+                        setError("Failed to update bio. Server response: " + JSON.stringify(data));
+                    }
+                })
+                .catch((err) => {
+                    console.error("Error:", err); // Log error for debugging
+                    setError("Error updating bio: " + err.message);
+                });
+        } else {
+            // If bio is unchanged, exit edit mode without updating
+            setIsEditingBio(false);
+        }
+    };
+
 
     if (loading) return <Typography>Loading...</Typography>;
     if (error) return <Typography color="error">{error}</Typography>;
@@ -156,16 +198,43 @@ const Profile = () => {
             <Typography variant="h6" component="h2" gutterBottom>
                 {user.email}
             </Typography>
-            <TextField
-                label="Bio"
-                multiline
-                rows={4}
-                variant="outlined"
-                fullWidth
-                sx={{ mb: 4 }}
-                value={user.bio}
-                disabled
-            />
+
+            {/* Bio section */}
+            {isEditingBio ? (
+                <Box width="100%">
+                    <TextField
+                        label="Edit Bio"
+                        multiline
+                        rows={4}
+                        variant="outlined"
+                        fullWidth
+                        value={newBio}
+                        onChange={(e) => setNewBio(e.target.value)}
+                        sx={{ mb: 4 }}
+                    />
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleBioSave}
+                    >
+                        Save Bio
+                    </Button>
+                </Box>
+            ) : (
+                <Box>
+                    <Typography variant="body1" gutterBottom>
+                        {user.bio || "No bio available"}
+                    </Typography>
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={handleBioEdit}
+                    >
+                        Edit Bio
+                    </Button>
+                </Box>
+            )}
+
             <Box
                 width="100%"
                 height="300px"
