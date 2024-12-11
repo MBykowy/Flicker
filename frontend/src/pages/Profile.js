@@ -1,4 +1,3 @@
-// Import necessary libraries
 import React, { useState, useEffect } from "react";
 import { Box, Typography, Avatar, TextField, Button } from "@mui/material";
 import { Link } from "react-router-dom";
@@ -9,8 +8,20 @@ const Profile = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        // Replace this email with the authenticated user's email in a real app
-        const email = "johndoe@example.com";
+        const getEmailFromCookies = () => {
+            console.log("Current cookies:", document.cookie); // Log cookies for debugging
+            const cookies = document.cookie.split("; ");
+            const emailCookie = cookies.find((cookie) => cookie.startsWith("email="));
+            return emailCookie ? decodeURIComponent(emailCookie.split("=")[1]) : null;
+        };
+
+        const email = getEmailFromCookies();
+
+        if (!email) {
+            setError("Email not found in cookies.");
+            setLoading(false);
+            return;
+        }
 
         fetch(`/auth/user-details?email=${email}`)
             .then((response) => {
@@ -21,8 +32,8 @@ const Profile = () => {
             })
             .then((data) => {
                 setUser({
-                    name: data.name,
-                    email: data.email,
+                    name: data.name || "No Name Provided",
+                    email: data.email || "No Email Provided",
                     bio: data.bio || "", // Assuming bio is included in response
                 });
                 setLoading(false);
@@ -93,4 +104,3 @@ const Profile = () => {
 };
 
 export default Profile;
-// This component fetches user details from the server and displays them on the page. It also includes a button to navigate back to the main page.

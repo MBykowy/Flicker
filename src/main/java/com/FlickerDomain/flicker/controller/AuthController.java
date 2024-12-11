@@ -4,7 +4,9 @@ import com.FlickerDomain.flicker.dto.RegisterRequest;
 import com.FlickerDomain.flicker.dto.LoginRequest;
 import com.FlickerDomain.flicker.model.User;
 import com.FlickerDomain.flicker.service.UserService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +33,7 @@ public class AuthController {
     }
 
     @PostMapping("/user-login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
         String email = loginRequest.getEmail();
         String password = loginRequest.getPassword();
         String captchaResponse = loginRequest.getCaptchaResponse();
@@ -49,6 +51,15 @@ public class AuthController {
             // Set session attribute after successful login
             HttpSession session = request.getSession(true);  // Creates a session if none exists
             session.setAttribute("user", email); // Store the user's email in the session
+
+            // Create a cookie with the user's email
+            Cookie emailCookie = new Cookie("email", email);
+            emailCookie.setHttpOnly(true); // Prevent JavaScript access
+            emailCookie.setSecure(true); // Send only over HTTPS
+            emailCookie.setMaxAge(7 * 24 * 60 * 60); // 7 days expiration
+            emailCookie.setPath("/"); // Make cookie available to the entire site
+            response.addCookie(emailCookie);
+
             return ResponseEntity.ok("Login successful");
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
@@ -63,13 +74,22 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletRequest request) {
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession(false);  // Retrieve the session if it exists
         if (session != null) {
             session.invalidate();  // Invalidate the session to log out the user
         }
+        // Remove the email cookie
+        Cookie emailCookie = new Cookie("email", null);
+        emailCookie.setHttpOnly(true);
+        emailCookie.setSecure(true);
+        emailCookie.setMaxAge(0); // Delete cookie
+        emailCookie.setPath("/");
+        response.addCookie(emailCookie);
+
         return ResponseEntity.ok("Logged out successfully");
     }
+
     @GetMapping("/user-details")
     public ResponseEntity<User> getUserDetails(@RequestParam String email) {
         User user = userService.getUserByEmail(email);

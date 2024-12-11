@@ -20,6 +20,13 @@ export const AuthProvider = ({ children }) => {
                     const isAuthenticated = await response.json();
                     console.log("Authentication status:", isAuthenticated); // Debugging log
                     setIsAuthenticated(isAuthenticated);
+
+                    if (isAuthenticated) {
+                        const email = getCookie("email");
+                        console.log("Logged in user's email:", email); // Debugging log
+                        localStorage.setItem("userEmail", email); // Optionally store in localStorage
+                    }
+
                     localStorage.setItem("isAuthenticated", JSON.stringify(isAuthenticated));
                 } else {
                     setIsAuthenticated(false);
@@ -57,6 +64,11 @@ export const AuthProvider = ({ children }) => {
         } catch (error) {
             console.error("Error logging out:", error);
         }
+    };
+
+    const getCookie = (name) => {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return match ? match[2] : null;
     };
 
     return (

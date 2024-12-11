@@ -71,6 +71,7 @@ function Login() {
             if (response.ok) {
                 alert("Login successful");
                 login(); // Update authentication state
+                document.cookie = `email=${email}; path=/; SameSite=Strict`; // Set email in cookies
                 navigate("/"); // Redirect after login
             } else {
                 const errorText = await response.text();
