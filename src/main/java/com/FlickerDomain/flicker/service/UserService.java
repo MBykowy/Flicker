@@ -42,6 +42,13 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public void updateUserPicture(String email, String pictureUrl) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.setPicture(pictureUrl);
+        userRepository.save(user);
+    }
+
     public String authenticate(LoginRequest request) {
         // Find the user by email
         User user = userRepository.findByEmail(request.getEmail())

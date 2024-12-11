@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 
+import java.util.Collections;
+import java.util.Map;
+
 @Controller
 @RequestMapping("/auth")
 public class AuthController {
@@ -71,6 +74,13 @@ public class AuthController {
         HttpSession session = request.getSession(false);  // Retrieve the existing session, if any
         boolean isAuthenticated = (session != null && session.getAttribute("user") != null);
         return ResponseEntity.ok(isAuthenticated);
+    }
+
+    @PostMapping("/update-picture")
+    public ResponseEntity<?> updatePicture(@RequestParam String email, @RequestBody Map<String, String> request) {
+        String pictureUrl = request.get("picture");
+        userService.updateUserPicture(email, pictureUrl);
+        return ResponseEntity.ok(Collections.singletonMap("success", true));
     }
 
     @PostMapping("/logout")
