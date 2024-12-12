@@ -19,22 +19,44 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import java.util.Collections;
 import java.util.Map;
 
+/**
+ * Controller for handling authentication-related requests.
+ */
 @Controller
 @RequestMapping("/auth")
 public class AuthController {
 
     private final UserService userService;
 
+    /**
+     * Constructor for AuthController.
+     *
+     * @param userService the user service to be used for user operations
+     */
     public AuthController(UserService userService) {
         this.userService = userService;
     }
 
+    /**
+     * Registers a new user.
+     *
+     * @param request the registration request containing user details
+     * @return a response entity indicating the result of the registration
+     */
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
         userService.register(request);
         return ResponseEntity.ok("User registered successfully");
     }
 
+    /**
+     * Logs in a user.
+     *
+     * @param loginRequest the login request containing user credentials
+     * @param request the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @return a response entity indicating the result of the login attempt
+     */
     @PostMapping("/user-login")
     public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
         String email = loginRequest.getEmail();
@@ -57,10 +79,10 @@ public class AuthController {
 
             // Create a cookie with the user's email
             Cookie emailCookie = new Cookie("email", email);
-            //emailCookie.setHttpOnly(true); // Zabezpiecza ciasteczko przed dostępem z JavaScript
-            emailCookie.setSecure(false); // Tylko przez HTTPS
-            emailCookie.setMaxAge(7 * 24 * 60 * 60); // 7 dni
-            emailCookie.setPath("/"); // Dostępność w całej witrynie
+            //emailCookie.setHttpOnly(true); // Protects the cookie from JavaScript access
+            emailCookie.setSecure(false); // Only through HTTPS
+            emailCookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
+            emailCookie.setPath("/"); // Available throughout the site
             response.addCookie(emailCookie);
 
             return ResponseEntity.ok("Login successful");
@@ -69,6 +91,12 @@ public class AuthController {
         }
     }
 
+    /**
+     * Checks if a user is authenticated.
+     *
+     * @param request the HTTP servlet request
+     * @return a response entity indicating whether the user is authenticated
+     */
     @GetMapping("/check-auth")
     public ResponseEntity<Boolean> checkAuth(HttpServletRequest request) {
         HttpSession session = request.getSession(false);  // Retrieve the existing session, if any
@@ -76,6 +104,13 @@ public class AuthController {
         return ResponseEntity.ok(isAuthenticated);
     }
 
+    /**
+     * Updates the user's profile picture.
+     *
+     * @param email the user's email
+     * @param request a map containing the new picture URL
+     * @return a response entity indicating the result of the update
+     */
     @PostMapping("/update-picture")
     public ResponseEntity<?> updatePicture(@RequestParam String email, @RequestBody Map<String, String> request) {
         String pictureUrl = request.get("picture");
@@ -83,6 +118,13 @@ public class AuthController {
         return ResponseEntity.ok(Collections.singletonMap("success", true));
     }
 
+    /**
+     * Logs out a user.
+     *
+     * @param request the HTTP servlet request
+     * @param response the HTTP servlet response
+     * @return a response entity indicating the result of the logout attempt
+     */
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession(false);  // Retrieve the session if it exists
@@ -100,12 +142,24 @@ public class AuthController {
         return ResponseEntity.ok("Logged out successfully");
     }
 
+    /**
+     * Retrieves user details.
+     *
+     * @param email the user's email
+     * @return a response entity containing the user details
+     */
     @GetMapping("/user-details")
     public ResponseEntity<User> getUserDetails(@RequestParam String email) {
         User user = userService.getUserByEmail(email);
         return ResponseEntity.ok(user);
     }
 
+    /**
+     * Updates the user's username.
+     *
+     * @param request a map containing the user's email and new username
+     * @return a response entity indicating the result of the update
+     */
     @PostMapping("/update-username")
     public ResponseEntity<?> updateUsername(@RequestBody Map<String, String> request) {
         String email = request.get("email");
@@ -114,6 +168,12 @@ public class AuthController {
         return ResponseEntity.ok(Collections.singletonMap("success", true));
     }
 
+    /**
+     * Updates the user's bio.
+     *
+     * @param request a map containing the user's email and new bio
+     * @return a response entity indicating the result of the update
+     */
     @PostMapping("/update-bio")
     public ResponseEntity<?> updateBio(@RequestBody Map<String, String> request) {
         String email = request.get("email");
@@ -122,13 +182,17 @@ public class AuthController {
         return ResponseEntity.ok(Collections.singletonMap("success", true));
     }
 
-
-    // Walidacja CAPTCHA
+    /**
+     * Validates the CAPTCHA response.
+     *
+     * @param captchaResponse the CAPTCHA response from the client
+     * @return true if the CAPTCHA is valid, false otherwise
+     */
     public boolean validateCaptcha(String captchaResponse) {
         String secretKey = "6LffRYYqAAAAAJEVVPDGDtu_WPrNaVdSqAfsW1Ij"; // Your secret key
         String verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
 
-        // Konfiguracja WebClient z większym limitem na debugowanie dużych odpowiedzi
+        // Configure WebClient with a larger limit for debugging large responses
         WebClient webClient = WebClient.builder()
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024))
@@ -146,7 +210,7 @@ public class AuthController {
 
             System.out.println("Captcha API Response: " + response);
 
-            // Parsowanie odpowiedzi
+            // Parse the response
             return response != null && response.contains("\"success\": true");
         } catch (Exception e) {
             e.printStackTrace();

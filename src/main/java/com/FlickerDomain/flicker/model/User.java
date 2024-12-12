@@ -6,7 +6,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.io.Serializable;
 
-
+/**
+ * Represents a user in the system.
+ * This entity is mapped to a database table using JPA annotations.
+ */
 @Entity  // This annotation is important!
 public class User implements Serializable {
 
@@ -20,50 +23,111 @@ public class User implements Serializable {
     private String bio;
     private String picture;
 
-    // Getters and Setters
+    /**
+     * Gets the unique identifier of the user.
+     *
+     * @return the user ID
+     */
     public Long getId() {
         return id;
     }
 
+    /**
+     * Sets the unique identifier of the user.
+     *
+     * @param id the user ID
+     */
     public void setId(Long id) {
         this.id = id;
     }
 
+    /**
+     * Gets the username of the user.
+     *
+     * @return the username
+     */
     public String getUsername() {
         return username;
     }
 
+    /**
+     * Sets the username of the user.
+     *
+     * @param username the username
+     */
     public void setUsername(String username) {
         this.username = username;
     }
 
+    /**
+     * Gets the email of the user.
+     *
+     * @return the email
+     */
     public String getEmail() {
         return email;
     }
 
+    /**
+     * Sets the email of the user.
+     *
+     * @param email the email
+     */
     public void setEmail(String email) {
         this.email = email;
     }
 
+    /**
+     * Gets the password of the user.
+     *
+     * @return the password
+     */
     public String getPassword() {
         return password;
     }
 
+    /**
+     * Sets the password of the user.
+     *
+     * @param password the password
+     */
     public void setPassword(String password) {
         this.password = password;
     }
 
+    /**
+     * Gets the bio of the user.
+     *
+     * @return the bio
+     */
     public String getBio() {
         return bio;
     }
 
+    /**
+     * Sets the bio of the user.
+     *
+     * @param bio the bio
+     */
     public void setBio(String bio) {
         this.bio = bio;
     }
 
-    public String getPicture(){return picture;}
+    /**
+     * Gets the profile picture URL of the user.
+     *
+     * @return the profile picture URL
+     */
+    public String getPicture() {
+        return picture;
+    }
 
-    public void setPicture(String picture){this.picture = picture;}
-
-
+    /**
+     * Sets the profile picture URL of the user.
+     *
+     * @param picture the profile picture URL
+     */
+    public void setPicture(String picture) {
+        this.picture = picture;
+    }
 }

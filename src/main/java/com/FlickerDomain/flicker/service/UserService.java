@@ -13,6 +13,9 @@
 
     import java.util.Optional;
 
+    /**
+     * Service class for managing user-related operations.
+     */
     @Service
     public class UserService {
 
@@ -20,14 +23,25 @@
         private final PasswordEncoder passwordEncoder;
         private final JwtProvider jwtProvider;
 
-
-
+        /**
+         * Constructor for UserService.
+         *
+         * @param userRepository the user repository
+         * @param passwordEncoder the password encoder
+         * @param jwtProvider the JWT provider
+         */
         public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtProvider jwtProvider) {
             this.userRepository = userRepository;
             this.passwordEncoder = passwordEncoder;
             this.jwtProvider = jwtProvider;
         }
 
+        /**
+         * Registers a new user.
+         *
+         * @param request the registration request containing user details
+         * @throws IllegalArgumentException if the email is already in use
+         */
         public void register(RegisterRequest request) {
             // Check if the user already exists by email
             if (userRepository.existsByEmail(request.getEmail())) {
@@ -42,7 +56,14 @@
             userRepository.save(user);
         }
 
-
+        /**
+         * Authenticates a user and generates a JWT token.
+         *
+         * @param request the login request containing user credentials
+         * @return the generated JWT token
+         * @throws UsernameNotFoundException if the user is not found
+         * @throws BadCredentialsException if the credentials are invalid
+         */
         public String authenticate(LoginRequest request) {
             // Find the user by email
             User user = userRepository.findByEmail(request.getEmail())
@@ -56,49 +77,84 @@
             throw new BadCredentialsException("Invalid credentials");
         }
 
+        /**
+         * Authenticates a user by username and password.
+         *
+         * @param username the username
+         * @param password the password
+         * @return true if authentication is successful, false otherwise
+         */
         public boolean authenticate(String username, String password) {
             Optional<User> optionalUser = userRepository.findByUsername(username);
 
             if (optionalUser.isPresent()) {
                 User user = optionalUser.get();
-                // Sprawdzamy, czy podane hasło pasuje do zahashowanego hasła w bazie
+                // Check if the provided password matches the stored password
                 return passwordEncoder.matches(password, user.getPassword());
             }
 
             return false;
         }
 
+        /**
+         * Authenticates a user by email and password.
+         *
+         * @param email the email
+         * @param password the password
+         * @return true if authentication is successful, false otherwise
+         */
         public boolean authenticateByEmail(String email, String password) {
             Optional<User> optionalUser = userRepository.findByEmail(email);
 
             if (optionalUser.isPresent()) {
                 User user = optionalUser.get();
 
-                // Porównanie hasła wprowadzonego przez użytkownika z zahashowanym hasłem
+                // Compare the provided password with the stored hashed password
                 boolean passwordMatches = passwordEncoder.matches(password, user.getPassword());
 
-                System.out.println("Password match: " + passwordMatches);  // Sprawdzenie wyniku porównania
+                System.out.println("Password match: " + passwordMatches);  // Check the comparison result
 
-                return passwordMatches;  // Zwrócenie, czy hasło pasuje
+                return passwordMatches;  // Return whether the password matches
             }
 
             System.out.println("User not found with email: " + email);
-            return false;  // Jeżeli użytkownik nie został znaleziony
+            return false;  // If the user is not found
         }
+
+        /**
+         * Retrieves a user by email.
+         *
+         * @param email the email
+         * @return the user
+         * @throws UsernameNotFoundException if the user is not found
+         */
         public User getUserByEmail(String email) {
             return userRepository.findByEmail(email)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         }
 
-
+        /**
+         * Registers a new user with the provided details.
+         *
+         * @param username the username
+         * @param email the email
+         * @param password the password
+         */
         public void registerNewUser(String username, String email, String password) {
             User user = new User();
             user.setUsername(username);
             user.setEmail(email);
-            user.setPassword(password); // Nie zapomnij o hashowaniu hasła przed zapisem
+            user.setPassword(password); // Don't forget to hash the password before saving
             userRepository.save(user);
         }
 
+        /**
+         * Updates the user's profile picture.
+         *
+         * @param email the email
+         * @param pictureUrl the new picture URL
+         * @throws UsernameNotFoundException if the user is not found
+         */
         public void updateUserPicture(String email, String pictureUrl) {
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -106,7 +162,13 @@
             userRepository.save(user);
         }
 
-
+        /**
+         * Updates the user's username.
+         *
+         * @param email the email
+         * @param username the new username
+         * @throws UsernameNotFoundException if the user is not found
+         */
         public void updateUserUsername(String email, String username) {
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -116,13 +178,19 @@
             }
         }
 
+        /**
+         * Updates the user's bio.
+         *
+         * @param email the email
+         * @param bio the new bio
+         * @throws UsernameNotFoundException if the user is not found
+         */
         public void updateUserBio(String email, String bio) {
             User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));;
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
             if (user != null) {
                 user.setBio(bio);
                 userRepository.save(user);
             }
         }
-
     }
