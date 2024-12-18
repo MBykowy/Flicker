@@ -1,17 +1,19 @@
-// Post.java
+// Comment.java
 package com.FlickerDomain.flicker.model;
 
 import jakarta.persistence.*;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
-public class Post {
+public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -21,16 +23,7 @@ public class Post {
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt = new Date();
-    private String mediaUrl;
 
-    private int likes; // New field for storing the number of likes
-    @ManyToMany
-    @JoinTable(
-            name = "post_likes",
-            joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<User> likedBy = new HashSet<>();
     // Getters and setters
     public Long getId() {
         return id;
@@ -38,6 +31,14 @@ public class Post {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Post getPost() {
+        return post;
+    }
+
+    public void setPost(Post post) {
+        this.post = post;
     }
 
     public User getUser() {
@@ -62,28 +63,5 @@ public class Post {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
-    }
-
-    public String getMediaUrl() {
-        return mediaUrl;
-    }
-
-    public void setMediaUrl(String mediaUrl) {
-        this.mediaUrl = mediaUrl;
-    }
-
-    public int getLikes() {
-        return likes;
-    }
-
-    public void setLikes(int likes) {
-        this.likes = likes;
-    }
-    public Set<User> getLikedBy() {
-        return likedBy;
-    }
-
-    public void setLikedBy(Set<User> likedBy) {
-        this.likedBy = likedBy;
     }
 }

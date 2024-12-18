@@ -1,6 +1,7 @@
 // PostController.java
 package com.FlickerDomain.flicker.controller;
 
+import com.FlickerDomain.flicker.model.Comment;
 import com.FlickerDomain.flicker.model.Post;
 import com.FlickerDomain.flicker.service.FileStorageService;
 import com.FlickerDomain.flicker.service.PostService;
@@ -38,6 +39,24 @@ public class PostController {
     public ResponseEntity<Void> deletePost(@PathVariable Long postId, @RequestParam String email) {
         postService.deletePost(postId, email);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{postId}/like")
+    public ResponseEntity<Post> toggleLikePost(@PathVariable Long postId, @RequestParam String email) {
+        Post post = postService.toggleLikePost(postId, email);
+        return ResponseEntity.ok(post);
+    }
+
+    @PostMapping("/{postId}/comment")
+    public ResponseEntity<Comment> addComment(@PathVariable Long postId, @RequestParam String email, @RequestParam String content) {
+        Comment comment = postService.addComment(postId, email, content);
+        return ResponseEntity.ok(comment);
+    }
+
+    @GetMapping("/{postId}/comments")
+    public ResponseEntity<List<Comment>> getComments(@PathVariable Long postId) {
+        List<Comment> comments = postService.getComments(postId);
+        return ResponseEntity.ok(comments);
     }
 
     @PostMapping("/upload")

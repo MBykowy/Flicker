@@ -14,6 +14,8 @@ const MainPage = () => {
     const [mediaUrl, setMediaUrl] = useState("");
     const [file, setFile] = useState(null);
     const [email, setEmail] = useState("");
+    const [comments, setComments] = useState({});
+    const [newComment, setNewComment] = useState("");
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -73,6 +75,41 @@ const MainPage = () => {
         });
         if (response.ok) {
             setPosts(posts.filter(post => post.id !== postId));
+        }
+    };
+
+    const handleToggleLikePost = async (postId) => {
+        const response = await fetch(`/posts/${postId}/like?email=${email}`, {
+            method: "POST",
+        });
+        if (response.ok) {
+            const updatedPost = await response.json();
+            setPosts(posts.map(post => post.id === postId ? updatedPost : post));
+        }
+    };
+
+    const handleAddComment = async (postId) => {
+        const response = await fetch(`/posts/${postId}/comment?email=${email}&content=${newComment}`, {
+            method: "POST",
+        });
+        if (response.ok) {
+            const comment = await response.json();
+            setComments({
+                ...comments,
+                [postId]: [...(comments[postId] || []), comment]
+            });
+            setNewComment("");
+        }
+    };
+
+    const fetchComments = async (postId) => {
+        const response = await fetch(`/posts/${postId}/comments`);
+        if (response.ok) {
+            const data = await response.json();
+            setComments({
+                ...comments,
+                [postId]: data
+            });
         }
     };
 
@@ -181,6 +218,53 @@ const MainPage = () => {
                         <Typography variant="caption" color="textSecondary">
                             {new Date(post.createdAt).toLocaleString()}
                         </Typography>
+                        <Box display="flex" alignItems="center" mt={2}>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={() => handleToggleLikePost(post.id)}
+                                style={{ marginRight: '10px' }}
+                            >
+                                {post.likedBy.includes(email) ? "Unlike" : "Like"}
+                            </Button>
+                            <Typography variant="body2">{post.likes} Likes</Typography>
+                        </Box>
+                        <Box mt={2}>
+                            <TextField
+                                label="Add a comment"
+                                fullWidth
+                                value={newComment}
+                                onChange={(e) => setNewComment(e.target.value)}
+                            />
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={() => handleAddComment(post.id)}
+                                style={{ marginTop: '10px' }}
+                            >
+                                Comment
+                            </Button>
+                        </Box>
+                        <Box mt={2}>
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                onClick={() => fetchComments(post.id)}
+                                style={{ marginBottom: '10px' }}
+                            >
+                                Load Comments
+                            </Button>
+                            {comments[post.id] && comments[post.id].map((comment) => (
+                                <Paper key={comment.id} elevation={1} style={{ padding: '10px', marginBottom: '10px' }}>
+                                    <Typography variant="body2">
+                                        <strong>{comment.user.email}</strong>: {comment.content}
+                                    </Typography>
+                                    <Typography variant="caption" color="textSecondary">
+                                        {new Date(comment.createdAt).toLocaleString()}
+                                    </Typography>
+                                </Paper>
+                            ))}
+                        </Box>
                         {post.user.email === email && (
                             <Button
                                 variant="contained"
