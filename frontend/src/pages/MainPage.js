@@ -1,5 +1,6 @@
+// MainPage.js
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Button, TextField, Paper, Container } from "@mui/material";
+import { Box, Typography, Button, TextField, Paper, Container, Avatar } from "@mui/material";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 import { useAuth } from "../context/AuthContext";
@@ -16,7 +17,7 @@ const MainPage = () => {
 
     useEffect(() => {
         const fetchPosts = async () => {
-            const response = await fetch(`/posts/user/${email}`);
+            const response = await fetch(`/posts`);
             const data = await response.json();
             setPosts(data);
         };
@@ -141,13 +142,6 @@ const MainPage = () => {
                         value={newPost}
                         onChange={(e) => setNewPost(e.target.value)}
                     />
-                    <TextField
-                        label="Media URL"
-                        fullWidth
-                        value={mediaUrl}
-                        onChange={(e) => setMediaUrl(e.target.value)}
-                        style={{ marginTop: '10px' }}
-                    />
                     <input
                         type="file"
                         onChange={handleFileChange}
@@ -165,6 +159,12 @@ const MainPage = () => {
 
                 {posts.map((post) => (
                     <Paper key={post.id} elevation={3} style={{ padding: '20px', width: '100%', marginBottom: '10px' }}>
+                        <Box display="flex" alignItems="center" mb={2}>
+                            <Avatar src={post.userProfilePictureUrl} alt={post.userName} />
+                            <Typography variant="h6" style={{ marginLeft: '10px' }}>
+                                {post.userName}
+                            </Typography>
+                        </Box>
                         <Typography variant="body1">{post.content}</Typography>
                         {post.mediaUrl && (
                             <Box mt={2}>
@@ -181,14 +181,16 @@ const MainPage = () => {
                         <Typography variant="caption" color="textSecondary">
                             {new Date(post.createdAt).toLocaleString()}
                         </Typography>
-                        <Button
-                            variant="contained"
-                            color="secondary"
-                            onClick={() => handleDeletePost(post.id)}
-                            style={{ marginTop: '10px' }}
-                        >
-                            Delete
-                        </Button>
+                        {post.user.email === email && (
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                onClick={() => handleDeletePost(post.id)}
+                                style={{ marginTop: '10px' }}
+                            >
+                                Delete
+                            </Button>
+                        )}
                     </Paper>
                 ))}
             </Container>

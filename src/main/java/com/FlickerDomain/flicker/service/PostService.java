@@ -25,13 +25,14 @@ public class PostService {
         Post post = new Post();
         post.setUser(user);
         post.setContent(content);
-        post.setMediaUrl(mediaUrl); // Dodaj to
+        post.setMediaUrl(mediaUrl);
         return postRepository.save(post);
     }
 
-    public List<Post> getPostsByUser(Long userId) {
-        return postRepository.findByUserId(userId);
+    public List<Post> getAllPosts() {
+        return postRepository.findAll();
     }
+
     public void deletePost(Long postId, String email) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
         if (!post.getUser().getEmail().equals(email)) {

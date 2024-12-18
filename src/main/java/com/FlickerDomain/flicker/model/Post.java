@@ -1,3 +1,4 @@
+// Post.java
 package com.FlickerDomain.flicker.model;
 
 import jakarta.persistence.*;
@@ -20,6 +21,7 @@ public class Post {
     private Date createdAt = new Date();
     private String mediaUrl;
 
+    // Getters and setters
     public Long getId() {
         return id;
     }
@@ -51,6 +53,7 @@ public class Post {
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
+
     public String getMediaUrl() {
         return mediaUrl;
     }
@@ -59,4 +62,11 @@ public class Post {
         this.mediaUrl = mediaUrl;
     }
 
+    public String getUserName() {
+        return user.getUsername();
+    }
+
+    public String getUserProfilePictureUrl() {
+        return user.getPicture();
+    }
 }
