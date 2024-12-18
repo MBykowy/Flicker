@@ -19,8 +19,8 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<Post> createPost(@RequestParam String email, @RequestParam String content) {
-        Post post = postService.createPost(email, content);
+    public ResponseEntity<Post> createPost(@RequestBody PostRequest postRequest) {
+        Post post = postService.createPost(postRequest.getEmail(), postRequest.getContent());
         return ResponseEntity.ok(post);
     }
 
@@ -29,4 +29,5 @@ public class PostController {
         List<Post> posts = postService.getPostsByUser(userId);
         return ResponseEntity.ok(posts);
     }
+
 }
