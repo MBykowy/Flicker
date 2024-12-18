@@ -18,6 +18,7 @@ public class Post {
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt = new Date();
+    private String mediaUrl;
 
     public Long getId() {
         return id;
@@ -49,6 +50,13 @@ public class Post {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+    public String getMediaUrl() {
+        return mediaUrl;
+    }
+
+    public void setMediaUrl(String mediaUrl) {
+        this.mediaUrl = mediaUrl;
     }
 
 }

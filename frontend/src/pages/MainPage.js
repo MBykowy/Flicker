@@ -10,6 +10,8 @@ const MainPage = () => {
     const { logout } = useAuth();
     const [posts, setPosts] = useState([]);
     const [newPost, setNewPost] = useState("");
+    const [mediaUrl, setMediaUrl] = useState("");
+    const [file, setFile] = useState(null);
     const [email, setEmail] = useState("");
 
     useEffect(() => {
@@ -26,18 +28,50 @@ const MainPage = () => {
         }
     }, [email]);
 
+    const handleFileChange = (e) => {
+        setFile(e.target.files[0]);
+    };
+
     const handlePostSubmit = async () => {
+        let uploadedMediaUrl = mediaUrl;
+
+        if (file) {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await fetch("/posts/upload", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (response.ok) {
+                uploadedMediaUrl = await response.text();
+            }
+        }
+
         const response = await fetch("/posts", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ email, content: newPost }),
+            body: JSON.stringify({ email, content: newPost, mediaUrl: uploadedMediaUrl }),
         });
+
         if (response.ok) {
             const post = await response.json();
             setPosts([post, ...posts]);
             setNewPost("");
+            setMediaUrl("");
+            setFile(null);
+        }
+    };
+
+    const handleDeletePost = async (postId) => {
+        const response = await fetch(`/posts/${postId}?email=${email}`, {
+            method: "DELETE",
+        });
+        if (response.ok) {
+            setPosts(posts.filter(post => post.id !== postId));
         }
     };
 
@@ -107,6 +141,18 @@ const MainPage = () => {
                         value={newPost}
                         onChange={(e) => setNewPost(e.target.value)}
                     />
+                    <TextField
+                        label="Media URL"
+                        fullWidth
+                        value={mediaUrl}
+                        onChange={(e) => setMediaUrl(e.target.value)}
+                        style={{ marginTop: '10px' }}
+                    />
+                    <input
+                        type="file"
+                        onChange={handleFileChange}
+                        style={{ marginTop: '10px' }}
+                    />
                     <Button
                         variant="contained"
                         color="primary"
@@ -120,9 +166,29 @@ const MainPage = () => {
                 {posts.map((post) => (
                     <Paper key={post.id} elevation={3} style={{ padding: '20px', width: '100%', marginBottom: '10px' }}>
                         <Typography variant="body1">{post.content}</Typography>
+                        {post.mediaUrl && (
+                            <Box mt={2}>
+                                {post.mediaUrl.match(/\.(jpeg|jpg|gif|png)$/) ? (
+                                    <img src={post.mediaUrl} alt="media" style={{ maxWidth: '100%' }} />
+                                ) : (
+                                    <video controls style={{ maxWidth: '100%' }}>
+                                        <source src={post.mediaUrl} type="video/mp4" />
+                                        Your browser does not support the video tag.
+                                    </video>
+                                )}
+                            </Box>
+                        )}
                         <Typography variant="caption" color="textSecondary">
                             {new Date(post.createdAt).toLocaleString()}
                         </Typography>
+                        <Button
+                            variant="contained"
+                            color="secondary"
+                            onClick={() => handleDeletePost(post.id)}
+                            style={{ marginTop: '10px' }}
+                        >
+                            Delete
+                        </Button>
                     </Paper>
                 ))}
             </Container>
