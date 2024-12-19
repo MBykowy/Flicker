@@ -26,7 +26,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'  // This includes WebSocket and Messaging
 
-    // Database dependencies
+    // Database dependenciesgh
     implementation 'mysql:mysql-connector-java:8.0.33'
     implementation 'org.hibernate:hibernate-core:6.2.13.Final'  // Updated to compatible version
     implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'

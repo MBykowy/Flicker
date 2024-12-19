@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Client } from '@stomp/stompjs';
 
 const MessageInput = ({ conversationId, senderId, socket }) => {
     const [content, setContent] = useState('');
@@ -6,7 +7,7 @@ const MessageInput = ({ conversationId, senderId, socket }) => {
     const sendMessage = () => {
         if (content.trim()) {
             const message = { conversationId, senderId, content };
-            socket.send(JSON.stringify(message));
+            socket.publish({ destination: '/app/chat', body: JSON.stringify(message) });
             setContent('');
         }
     };

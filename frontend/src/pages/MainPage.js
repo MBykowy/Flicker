@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Box, Typography, Button, TextField, Paper, Container, Avatar } from "@mui/material";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
@@ -7,6 +7,9 @@ import { Link } from "react-router-dom";
 import ChatList from "../components/ChatList";
 import MessageView from "../components/MessegeView";
 import MessageInput from "../components/MessageInput";
+import SockJS from "sockjs-client";
+import { Client } from '@stomp/stompjs';
+
 
 const MainPage = () => {
     const { width, height } = useWindowSize();
@@ -19,7 +22,8 @@ const MainPage = () => {
     const [comments, setComments] = useState({});
     const [newComment, setNewComment] = useState("");
     const [selectedConversation, setSelectedConversation] = useState(null);
-    const [socket, setSocket] = useState(null);
+    const [stompClient, setStompClient] = useState(null);
+    const [messages, setMessages] = useState([]);
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -36,19 +40,31 @@ const MainPage = () => {
     }, [email]);
 
     useEffect(() => {
-        const newSocket = new WebSocket('ws://yourserver.com/chat');
-        newSocket.onopen = () => console.log('WebSocket connection established');
-        newSocket.onmessage = (event) => {
-            const message = JSON.parse(event.data);
-            console.log("New message received: ", message);
-            if (message.conversationId === selectedConversation) {
-                setMessages(prevMessages => [...prevMessages, message]);
+        const socket = new SockJS('/ws');
+        const client = new Client({
+            webSocketFactory: () => socket,
+            onConnect: () => {
+                console.log('WebSocket connection established');
+                client.subscribe('/topic/messages', (message) => {
+                    const receivedMessage = JSON.parse(message.body);
+                    console.log("New message received: ", receivedMessage);
+                    if (receivedMessage.conversationId === selectedConversation) {
+                        setMessages(prevMessages => [...prevMessages, receivedMessage]);
+                    }
+                });
+            }
+        });
+
+        client.activate();
+        setStompClient(client);
+
+        return () => {
+            if (client) {
+                client.deactivate();
             }
         };
-        setSocket(newSocket);
-
-        return () => newSocket.close();
     }, [selectedConversation]);
+
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
@@ -311,7 +327,7 @@ const MainPage = () => {
                             {selectedConversation && (
                                 <>
                                     <MessageView conversationId={selectedConversation} />
-                                    <MessageInput conversationId={selectedConversation} senderId={1} socket={socket} />
+                                    <MessageInput conversationId={selectedConversation} senderId={1} socket={stompClient} />
                                 </>
                             )}
                         </Box>

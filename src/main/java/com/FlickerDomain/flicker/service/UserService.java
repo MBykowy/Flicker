@@ -11,6 +11,7 @@
     import org.springframework.security.crypto.password.PasswordEncoder;
     import org.springframework.stereotype.Service;
 
+    import java.util.List;
     import java.util.Optional;
 
     /**
@@ -34,6 +35,10 @@
             this.userRepository = userRepository;
             this.passwordEncoder = passwordEncoder;
             this.jwtProvider = jwtProvider;
+        }
+
+        public List<User> getAllUsers() {
+            return userRepository.findAll();
         }
 
         /**
