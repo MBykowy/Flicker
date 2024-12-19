@@ -32,7 +32,9 @@ const ChatList = ({ onSelectConversation }) => {
             <ul>
                 {conversations.map(conversation => (
                     <li key={conversation.id} onClick={() => onSelectConversation(conversation.id)}>
-                        {conversation.otherParticipant}
+                        <div>Participant: {conversation.otherParticipant}</div>
+                        <div>Last Message: {conversation.lastMessage}</div>
+                        <div>Content: {conversation.content}</div>
                     </li>
                 ))}
             </ul>

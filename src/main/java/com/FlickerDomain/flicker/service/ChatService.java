@@ -67,6 +67,15 @@ public class ChatService {
         conversationDTO.setId(conversation.getId());
         conversationDTO.setOtherParticipant(conversation.getParticipant1().getId());
         conversationDTO.setLastMessage(conversation.getLastMessageTimestamp().toString());
+
+        // Fetch the last message content
+        Message lastMessage = messageRepository.findTopByConversationOrderByTimestampDesc(conversation);
+        if (lastMessage != null) {
+            conversationDTO.setContent(lastMessage.getContent());
+        } else {
+            conversationDTO.setContent(""); // Default to empty string if no messages
+        }
+
         conversationDTO.setUnreadCount(0); // Placeholder for unread count logic
         return conversationDTO;
     }

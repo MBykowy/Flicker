@@ -5,6 +5,7 @@ public class ConversationDTO {
     private Long otherParticipant;
     private String lastMessage;
     private int unreadCount;
+    private String content; // Add this field
 
     public Long getOtherParticipant() {
         return otherParticipant;
@@ -36,5 +37,13 @@ public class ConversationDTO {
 
     public void setUnreadCount(int unreadCount) {
         this.unreadCount = unreadCount;
+    }
+
+    public String getContent() { // Add this getter
+        return content;
+    }
+
+    public void setContent(String content) { // Add this setter
+        this.content = content;
     }
 }
