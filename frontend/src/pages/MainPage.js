@@ -1,10 +1,12 @@
-// MainPage.js
 import React, { useState, useEffect } from "react";
 import { Box, Typography, Button, TextField, Paper, Container, Avatar } from "@mui/material";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
+import ChatList from "../components/ChatList";
+import MessageView from "../components/MessegeView";
+import MessageInput from "../components/MessageInput";
 
 const MainPage = () => {
     const { width, height } = useWindowSize();
@@ -16,6 +18,8 @@ const MainPage = () => {
     const [email, setEmail] = useState("");
     const [comments, setComments] = useState({});
     const [newComment, setNewComment] = useState("");
+    const [selectedConversation, setSelectedConversation] = useState(null);
+    const [socket, setSocket] = useState(null);
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -30,6 +34,21 @@ const MainPage = () => {
             fetchPosts();
         }
     }, [email]);
+
+    useEffect(() => {
+        const newSocket = new WebSocket('ws://yourserver.com/chat');
+        newSocket.onopen = () => console.log('WebSocket connection established');
+        newSocket.onmessage = (event) => {
+            const message = JSON.parse(event.data);
+            console.log("New message received: ", message);
+            if (message.conversationId === selectedConversation) {
+                setMessages(prevMessages => [...prevMessages, message]);
+            }
+        };
+        setSocket(newSocket);
+
+        return () => newSocket.close();
+    }, [selectedConversation]);
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
@@ -277,6 +296,27 @@ const MainPage = () => {
                         )}
                     </Paper>
                 ))}
+            </Container>
+
+            <Container maxWidth="md" style={{ marginTop: '20px' }}>
+                <Paper elevation={3} style={{ padding: '20px', width: '100%' }}>
+                    <Typography variant="h4" gutterBottom>
+                        Chat
+                    </Typography>
+                    <Box display="flex">
+                        <Box flex={1} style={{ marginRight: '20px' }}>
+                            <ChatList onSelectConversation={setSelectedConversation} />
+                        </Box>
+                        <Box flex={2}>
+                            {selectedConversation && (
+                                <>
+                                    <MessageView conversationId={selectedConversation} />
+                                    <MessageInput conversationId={selectedConversation} senderId={1} socket={socket} />
+                                </>
+                            )}
+                        </Box>
+                    </Box>
+                </Paper>
             </Container>
         </Box>
     );
