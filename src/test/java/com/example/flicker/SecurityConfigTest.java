@@ -1,60 +1,68 @@
 package com.example.flicker;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import com.FlickerDomain.flicker.config.SecurityConfig;
-import com.FlickerDomain.flicker.security.JwtProvider;
 import com.FlickerDomain.flicker.security.JwtAuthenticationFilter;
+import com.FlickerDomain.flicker.security.JwtProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 class SecurityConfigTest {
 
     @Mock
-    private JwtProvider jwtProvider;
+    private JwtProvider jwtProvider; // Mocking JwtProvider
 
-    private SecurityConfig securityConfig;
+    @InjectMocks
+    private SecurityConfig securityConfig; // Injecting mocks into the SecurityConfig
+
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        securityConfig = new SecurityConfig(jwtProvider);
-    }
-
-    @Test
-    void testPasswordEncoder() {
-        // Test czy bean PasswordEncoder zwraca BCryptPasswordEncoder
-        PasswordEncoder passwordEncoder = securityConfig.passwordEncoder();
-        assertThat(passwordEncoder).isNotNull();
-        assertThat(passwordEncoder.getClass().getSimpleName()).isEqualTo("BCryptPasswordEncoder");
-    }
-
-    @Test
-    void testRestTemplate() {
-        // Test czy bean RestTemplate jest prawidłowo skonfigurowany
-        RestTemplate restTemplate = securityConfig.restTemplate();
-        assertThat(restTemplate).isNotNull();
+        // Initialize JwtAuthenticationFilter with the mocked JwtProvider
+        jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtProvider);
     }
 
     @Test
     void testSecurityFilterChain() throws Exception {
-        // Test czy SecurityFilterChain jest prawidłowo skonfigurowany
+        // Create a mock of HttpSecurity
         HttpSecurity httpSecurity = mock(HttpSecurity.class);
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtProvider);
 
-        SecurityConfig spyConfig = new SecurityConfig(jwtProvider) {
+        // Call the method to test
+        SecurityFilterChain filterChain = securityConfig.securityFilterChain(httpSecurity);
 
-            public JwtAuthenticationFilter jwtAuthenticationFilter() {
-                return jwtAuthenticationFilter;
-            }
-        };
+        // Verify that the filter chain is not null
+        assertThat(filterChain).isNotNull();
 
-        assertThat(spyConfig.securityFilterChain(httpSecurity)).isNotNull();
+        // Verify if the JWT filter is correctly added before UsernamePasswordAuthenticationFilter
+        verify(httpSecurity, times(1)).addFilterBefore(eq(jwtAuthenticationFilter), eq(UsernamePasswordAuthenticationFilter.class));
+    }
+
+    @Test
+    void testPasswordEncoder() {
+        // Test the password encoder bean
+        PasswordEncoder passwordEncoder = securityConfig.passwordEncoder();
+
+        // Assert that the returned encoder is an instance of BCryptPasswordEncoder
+        assertThat(passwordEncoder).isInstanceOf(BCryptPasswordEncoder.class);
+    }
+
+    @Test
+    void testRestTemplate() {
+        // Test the RestTemplate bean
+        RestTemplate restTemplate = securityConfig.restTemplate();
+
+        // Assert that the returned RestTemplate is not null
+        assertThat(restTemplate).isNotNull();
     }
 }
