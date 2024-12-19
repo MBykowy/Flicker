@@ -18,35 +18,34 @@ repositories {
 }
 
 dependencies {
-    dependencies {
-        // Spring Boot Starter dependencies
-        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-        implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-        implementation 'org.springframework.boot:spring-boot-starter-web'
-        implementation 'org.springframework.boot:spring-boot-starter-security'
-        implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // Spring Boot Starter dependencies
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-        // Database dependencies
-        implementation 'mysql:mysql-connector-java:8.0.33'
-        implementation 'org.hibernate:hibernate-core:6.5.3.Final'
-        implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
+    // Database dependencies
+    implementation 'mysql:mysql-connector-java:8.0.33'
+    implementation 'org.hibernate:hibernate-core:6.5.3.Final'
+    implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 
-        // JWT dependencies
-        implementation 'io.jsonwebtoken:jjwt:0.9.1'
-        implementation 'com.auth0:java-jwt:2.0.1'
+    // JWT dependencies
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+    implementation 'com.auth0:java-jwt:2.0.1'
 
-        // Test dependencies
-        testImplementation 'org.springframework.boot:spring-boot-starter-test'
-        testImplementation 'org.mockito:mockito-junit-jupiter:5.1.1'
+    // Spring Security Core for BCryptPasswordEncoder
+    implementation 'org.springframework.security:spring-security-core:5.8.2' // <-- Ta zależność jest potrzebna
 
-        // Optional: Include CORS handling or additional features
-        implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    // Test dependencies
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.1.1'
 
+    // Optional: Include CORS handling or additional features
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-        implementation 'org.springframework.boot:spring-boot-starter-web'
-        implementation 'org.springframework:spring-web'
-    }
-
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework:spring-web'
 }
 
 tasks.named('test') {
