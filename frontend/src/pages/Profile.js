@@ -31,6 +31,24 @@ const Profile = () => {
     const [newBio, setNewBio] = useState("");
     const [isEditingUsername, setIsEditingUsername] = useState(false);
     const [newUsername, setNewUsername] = useState("");
+    const [theme, setTheme] = useState("light");
+
+
+    useEffect(() => {
+        // Pobierz zapisany motyw z localStorage
+        const savedTheme = localStorage.getItem("theme");
+        if (savedTheme) {
+            setTheme(savedTheme);
+        } else {
+            // Jeśli nie ma zapisanej wartości, ustaw domyślnie na "light"
+            setTheme("light");
+        }
+    }, []);
+
+    useEffect(() => {
+        document.body.style.backgroundColor = theme === "light" ? "lightblue" : "#333";
+        document.body.style.color = theme === "light" ? "#000" : "#fff";
+    }, [theme]);
 
     useEffect(() => {
         const getEmailFromCookies = () => {
@@ -120,7 +138,6 @@ const Profile = () => {
         </Container>
     );
 
-
     return (
         <Container maxWidth="sm">
             <Paper elevation={3} sx={{ p: 4, mt: 4, borderRadius: 2 }}>
@@ -181,11 +198,7 @@ const Profile = () => {
                     {/* Bio */}
                     <Grid item container justifyContent="center" alignItems="center" spacing={1}>
                         <Grid item>
-                            <Typography
-                                variant="body1"
-                                color="text.secondary"
-                                align="center"
-                            >
+                            <Typography variant="body1" color="text.secondary" align="center">
                                 {user.bio || "No bio added yet"}
                             </Typography>
                         </Grid>
@@ -313,12 +326,12 @@ const Profile = () => {
 
                     {/* Edit Profile Link */}
                     <Grid item>
-                        <Link to="/edit-profile" style={{ textDecoration: 'none' }}>
+                        <Link to="/" style={{ textDecoration: 'none' }}>
                             <Button
                                 variant="contained"
                                 color="primary"
                             >
-                                Edit Profile
+                                Powrót
                             </Button>
                         </Link>
                     </Grid>

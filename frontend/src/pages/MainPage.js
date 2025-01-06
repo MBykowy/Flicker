@@ -19,6 +19,28 @@ const MainPage = () => {
     const [comments, setComments] = useState({});
     const [newComment, setNewComment] = useState("");
 
+    const [theme, setTheme] = useState("light");  // State to track the current theme
+
+    useEffect(() => {
+        // Check localStorage for the theme preference and set the theme
+        const savedTheme = localStorage.getItem("theme");
+        if (savedTheme) {
+            setTheme(savedTheme);
+        } else {
+            // If no saved theme, set it to light by default
+            setTheme("light");
+        }
+    }, []);
+
+    useEffect(() => {
+        // Set the background color and theme class based on the current theme
+        document.body.style.backgroundColor = theme === "light" ? "lightblue" : "#333";
+        document.body.style.color = theme === "light" ? "#000" : "#fff";
+
+        // Save the theme preference in localStorage
+        localStorage.setItem("theme", theme);
+    }, [theme]);
+
     useEffect(() => {
         const fetchPosts = async () => {
             const response = await fetch(`/posts`);
@@ -147,6 +169,10 @@ const MainPage = () => {
         }
     };
 
+    const toggleTheme = () => {
+        setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
+    };
+
     return (
         <Box
             display="flex"
@@ -154,7 +180,7 @@ const MainPage = () => {
             alignItems="center"
             justifyContent="center"
             minHeight="100vh"
-            bgcolor="background.default"
+            bgcolor={theme === "light" ? "lightblue" : "#333"}
             p={4}
             style={{ position: 'relative', overflow: 'hidden' }}
         >
@@ -187,6 +213,19 @@ const MainPage = () => {
                 }}
             >
                 Logout
+            </Button>
+
+            <Button
+                variant="contained"
+                color="default"
+                onClick={toggleTheme}
+                style={{
+                    position: 'absolute',
+                    bottom: 20,
+                    zIndex: 10
+                }}
+            >
+                Toggle {theme === "light" ? "Dark" : "Light"} Mode
             </Button>
 
             <Typography
