@@ -131,4 +131,16 @@ public class PostService {
     public List<Comment> getComments(Long postId) {
         return commentRepository.findByPostId(postId);
     }
+
+    @Transactional
+    public Post editPost(Long postId, String email, String newContent, String newMediaUrl) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+        if (!post.getUser().getEmail().equals(email)) {
+            throw new RuntimeException("Unauthorized");
+        }
+        post.setContent(newContent);
+        post.setMediaUrl(newMediaUrl);
+        return postRepository.save(post);
+    }
 }
+

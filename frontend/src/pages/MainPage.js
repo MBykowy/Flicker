@@ -1,15 +1,10 @@
-import { useState, useEffect } from "react";
+// MainPage.js
+import React, { useState, useEffect } from "react";
 import { Box, Typography, Button, TextField, Paper, Container, Avatar } from "@mui/material";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
-import ChatList from "../components/ChatList";
-import MessageView from "../components/MessegeView";
-import MessageInput from "../components/MessageInput";
-import SockJS from "sockjs-client";
-import { Client } from '@stomp/stompjs';
-
 
 const MainPage = () => {
     const { width, height } = useWindowSize();
@@ -19,11 +14,11 @@ const MainPage = () => {
     const [mediaUrl, setMediaUrl] = useState("");
     const [file, setFile] = useState(null);
     const [email, setEmail] = useState("");
+    const [editingPost, setEditingPost] = useState(null);
+    const [editContent, setEditContent] = useState("");
+    const [editMediaUrl, setEditMediaUrl] = useState("");
     const [comments, setComments] = useState({});
     const [newComment, setNewComment] = useState("");
-    const [selectedConversation, setSelectedConversation] = useState(null);
-    const [stompClient, setStompClient] = useState(null);
-    const [messages, setMessages] = useState([]);
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -38,33 +33,6 @@ const MainPage = () => {
             fetchPosts();
         }
     }, [email]);
-
-    useEffect(() => {
-        const socket = new SockJS('/ws');
-        const client = new Client({
-            webSocketFactory: () => socket,
-            onConnect: () => {
-                console.log('WebSocket connection established');
-                client.subscribe('/topic/messages', (message) => {
-                    const receivedMessage = JSON.parse(message.body);
-                    console.log("New message received: ", receivedMessage);
-                    if (receivedMessage.conversationId === selectedConversation) {
-                        setMessages(prevMessages => [...prevMessages, receivedMessage]);
-                    }
-                });
-            }
-        });
-
-        client.activate();
-        setStompClient(client);
-
-        return () => {
-            if (client) {
-                client.deactivate();
-            }
-        };
-    }, [selectedConversation]);
-
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
@@ -123,34 +91,60 @@ const MainPage = () => {
         }
     };
 
-    const handleAddComment = async (postId) => {
-        const response = await fetch(`/posts/${postId}/comment?email=${email}&content=${newComment}`, {
-            method: "POST",
-        });
-        if (response.ok) {
-            const comment = await response.json();
-            setComments({
-                ...comments,
-                [postId]: [...(comments[postId] || []), comment]
-            });
-            setNewComment("");
-        }
+    const handleEditPost = (post) => {
+        setEditingPost(post);
+        setEditContent(post.content);
+        setEditMediaUrl(post.mediaUrl);
     };
 
-    const fetchComments = async (postId) => {
-        const response = await fetch(`/posts/${postId}/comments`);
+    const handleEditSubmit = async () => {
+        const response = await fetch(`/posts/${editingPost.id}?email=${email}&content=${editContent}&mediaUrl=${editMediaUrl}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
         if (response.ok) {
-            const data = await response.json();
-            setComments({
-                ...comments,
-                [postId]: data
-            });
+            const updatedPost = await response.json();
+            setPosts(posts.map(post => post.id === updatedPost.id ? updatedPost : post));
+            setEditingPost(null);
+            setEditContent("");
+            setEditMediaUrl("");
         }
     };
 
     const handleLogout = () => {
         logout();
         window.location.reload();
+    };
+
+    const handleShowComments = async (postId) => {
+        const response = await fetch(`/posts/${postId}/comments`);
+        if (response.ok) {
+            const data = await response.json();
+            setComments(prevComments => ({ ...prevComments, [postId]: data }));
+        }
+    };
+
+    const handleAddComment = async (postId) => {
+        const trimmedComment = newComment.trim();
+        const response = await fetch(`/posts/${postId}/comment?email=${email}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(trimmedComment),
+        });
+
+        if (response.ok) {
+            const comment = await response.json();
+            setComments(prevComments => ({
+                ...prevComments,
+                [postId]: [...(prevComments[postId] || []), comment]
+            }));
+            setNewComment("");
+        }
     };
 
     return (
@@ -237,102 +231,135 @@ const MainPage = () => {
                                 {post.userName}
                             </Typography>
                         </Box>
-                        <Typography variant="body1">{post.content}</Typography>
-                        {post.mediaUrl && (
-                            <Box mt={2}>
-                                {post.mediaUrl.match(/\.(jpeg|jpg|gif|png)$/) ? (
-                                    <img src={post.mediaUrl} alt="media" style={{ maxWidth: '100%' }} />
-                                ) : (
-                                    <video controls style={{ maxWidth: '100%' }}>
-                                        <source src={post.mediaUrl} type="video/mp4" />
-                                        Your browser does not support the video tag.
-                                    </video>
+                        {editingPost && editingPost.id === post.id ? (
+                            <>
+                                <TextField
+                                    label="Edit Content"
+                                    fullWidth
+                                    multiline
+                                    rows={4}
+                                    value={editContent}
+                                    onChange={(e) => setEditContent(e.target.value)}
+                                    style={{ marginBottom: '10px' }}
+                                />
+                                <TextField
+                                    label="Edit Media URL"
+                                    fullWidth
+                                    value={editMediaUrl}
+                                    onChange={(e) => setEditMediaUrl(e.target.value)}
+                                    style={{ marginBottom: '10px' }}
+                                />
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={handleEditSubmit}
+                                    style={{ marginRight: '10px' }}
+                                >
+                                    Save
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    color="secondary"
+                                    onClick={() => setEditingPost(null)}
+                                >
+                                    Cancel
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Typography variant="body1">{post.content}</Typography>
+                                {post.mediaUrl && (
+                                    <Box mt={2}>
+                                        {post.mediaUrl.match(/\.(jpeg|jpg|gif|png)$/) ? (
+                                            <img src={post.mediaUrl} alt="media" style={{ maxWidth: '100%' }} />
+                                        ) : (
+                                            <video controls style={{ maxWidth: '100%' }}>
+                                                <source src={post.mediaUrl} type="video/mp4" />
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        )}
+                                    </Box>
                                 )}
-                            </Box>
-                        )}
-                        <Typography variant="caption" color="textSecondary">
-                            {new Date(post.createdAt).toLocaleString()}
-                        </Typography>
-                        <Box display="flex" alignItems="center" mt={2}>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={() => handleToggleLikePost(post.id)}
-                                style={{ marginRight: '10px' }}
-                            >
-                                {post.likedBy.includes(email) ? "Unlike" : "Like"}
-                            </Button>
-                            <Typography variant="body2">{post.likes} Likes</Typography>
-                        </Box>
-                        <Box mt={2}>
-                            <TextField
-                                label="Add a comment"
-                                fullWidth
-                                value={newComment}
-                                onChange={(e) => setNewComment(e.target.value)}
-                            />
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={() => handleAddComment(post.id)}
-                                style={{ marginTop: '10px' }}
-                            >
-                                Comment
-                            </Button>
-                        </Box>
-                        <Box mt={2}>
-                            <Button
-                                variant="contained"
-                                color="secondary"
-                                onClick={() => fetchComments(post.id)}
-                                style={{ marginBottom: '10px' }}
-                            >
-                                Load Comments
-                            </Button>
-                            {comments[post.id] && comments[post.id].map((comment) => (
-                                <Paper key={comment.id} elevation={1} style={{ padding: '10px', marginBottom: '10px' }}>
-                                    <Typography variant="body2">
-                                        <strong>{comment.user.email}</strong>: {comment.content}
-                                    </Typography>
-                                    <Typography variant="caption" color="textSecondary">
-                                        {new Date(comment.createdAt).toLocaleString()}
-                                    </Typography>
-                                </Paper>
-                            ))}
-                        </Box>
-                        {post.user.email === email && (
-                            <Button
-                                variant="contained"
-                                color="secondary"
-                                onClick={() => handleDeletePost(post.id)}
-                                style={{ marginTop: '10px' }}
-                            >
-                                Delete
-                            </Button>
+                                <Typography variant="caption" color="textSecondary">
+                                    {new Date(post.createdAt).toLocaleString()}
+                                </Typography>
+                                <Box display="flex" alignItems="center" mt={2}>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={() => handleToggleLikePost(post.id)}
+                                        style={{ marginRight: '10px' }}
+                                    >
+                                        {post.likedBy.includes(email) ? "Unlike" : "Like"}
+                                    </Button>
+                                    <Typography variant="body2">{post.likes} Likes</Typography>
+                                </Box>
+                                {post.user.email === email && (
+                                    <>
+                                        <Button
+                                            variant="contained"
+                                            color="secondary"
+                                            onClick={() => handleEditPost(post)}
+                                            style={{ marginTop: '10px', marginRight: '10px' }}
+                                        >
+                                            Edit
+                                        </Button>
+                                        <Button
+                                            variant="contained"
+                                            color="secondary"
+                                            onClick={() => handleDeletePost(post.id)}
+                                            style={{ marginTop: '10px' }}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </>
+                                )}
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => handleShowComments(post.id)}
+                                    style={{ marginTop: '10px' }}
+                                >
+                                    Comments
+                                </Button>
+                                {comments[post.id] && (
+                                    <Box mt={2}>
+                                        {comments[post.id].map(comment => (
+                                            <Paper key={comment.id} elevation={2} style={{ padding: '10px', marginBottom: '10px' }}>
+                                                {comment.user && (
+                                                    <>
+                                                        <Typography variant="body2">{comment.user.username}</Typography>
+                                                        <Typography variant="body1">{comment.content}</Typography>
+                                                        <Typography variant="caption" color="textSecondary">
+                                                            {new Date(comment.createdAt).toLocaleString()}
+                                                        </Typography>
+                                                    </>
+                                                )}
+                                            </Paper>
+                                        ))}
+                                        <TextField
+                                            label="Add a comment"
+                                            fullWidth
+                                            multiline
+                                            rows={2}
+                                            value={newComment}
+                                            onChange={(e) => setNewComment(e.target.value)}
+                                            style={{ marginTop: '10px' }}
+                                        />
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={() => handleAddComment(post.id)}
+                                            style={{ marginTop: '10px' }}
+                                        >
+                                            Comment
+                                        </Button>
+                                    </Box>
+                                )}
+                            </>
                         )}
                     </Paper>
                 ))}
-            </Container>
-
-            <Container maxWidth="md" style={{ marginTop: '20px' }}>
-                <Paper elevation={3} style={{ padding: '20px', width: '100%' }}>
-                    <Typography variant="h4" gutterBottom>
-                        Chat
-                    </Typography>
-                    <Box display="flex">
-                        <Box flex={1} style={{ marginRight: '20px' }}>
-                            <ChatList onSelectConversation={setSelectedConversation} />
-                        </Box>
-                        <Box flex={2}>
-                            {selectedConversation && (
-                                <>
-                                    <MessageView conversationId={selectedConversation} />
-                                    <MessageInput conversationId={selectedConversation} senderId={1} socket={stompClient} />
-                                </>
-                            )}
-                        </Box>
-                    </Box>
-                </Paper>
             </Container>
         </Box>
     );

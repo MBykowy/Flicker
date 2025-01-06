@@ -90,11 +90,10 @@ public class PostController {
      * @return dodany komentarz w obiekcie ResponseEntity
      */
     @PostMapping("/{postId}/comment")
-    public ResponseEntity<Comment> addComment(@PathVariable Long postId, @RequestParam String email, @RequestParam String content) {
+    public ResponseEntity<String> addComment(@PathVariable Long postId, @RequestParam String email, @RequestBody String content) {
         Comment comment = postService.addComment(postId, email, content);
-        return ResponseEntity.ok(comment);
+        return ResponseEntity.ok(comment.getContent());
     }
-
     /**
      * Pobiera wszystkie komentarze do posta.
      *
@@ -118,4 +117,11 @@ public class PostController {
         String fileUrl = fileStorageService.storeFile(file);
         return ResponseEntity.ok(fileUrl);
     }
+
+    @PutMapping("/{postId}")
+    public ResponseEntity<Post> editPost(@PathVariable Long postId, @RequestParam String email, @RequestParam String content, @RequestParam String mediaUrl) {
+        Post post = postService.editPost(postId, email, content, mediaUrl);
+        return ResponseEntity.ok(post);
+    }
+
 }
