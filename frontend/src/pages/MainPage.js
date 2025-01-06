@@ -20,6 +20,7 @@ const MainPage = () => {
     const [newComment, setNewComment] = useState("");
 
     const [theme, setTheme] = useState("light");  // State to track the current theme
+    const [language, setLanguage] = useState("en"); // State for language
 
     useEffect(() => {
         // Check localStorage for the theme preference and set the theme
@@ -173,6 +174,39 @@ const MainPage = () => {
         setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
     };
 
+    const toggleLanguage = () => {
+        setLanguage(prevLanguage => prevLanguage === "en" ? "pl" : "en");
+    };
+
+    const languageText = {
+        en: {
+            welcome: "Welcome to the Main Page!",
+            postPlaceholder: "What's on your mind?",
+            postButton: "Post",
+            like: "Like",
+            unlike: "Unlike",
+            comments: "Comments",
+            addComment: "Add a comment",
+            commentButton: "Comment",
+            profile: "Profile",
+            logout: "Logout",
+            toggleMode: "Toggle Dark Mode"
+        },
+        pl: {
+            welcome: "Witaj na stronie głównej!",
+            postPlaceholder: "Co masz na myśli?",
+            postButton: "Opublikuj",
+            like: "Polub",
+            unlike: "Nie lubię",
+            comments: "Komentarze",
+            addComment: "Dodaj komentarz",
+            commentButton: "Komentuj",
+            profile: "Profil",
+            logout: "Wyloguj",
+            toggleMode: "Przełącz tryb ciemny"
+        }
+    };
+
     return (
         <Box
             display="flex"
@@ -198,7 +232,7 @@ const MainPage = () => {
                     zIndex: 10
                 }}
             >
-                Profile
+                {languageText[language].profile}
             </Button>
 
             <Button
@@ -212,7 +246,7 @@ const MainPage = () => {
                     zIndex: 10
                 }}
             >
-                Logout
+                {languageText[language].logout}
             </Button>
 
             <Button
@@ -225,7 +259,21 @@ const MainPage = () => {
                     zIndex: 10
                 }}
             >
-                Toggle {theme === "light" ? "Dark" : "Light"} Mode
+                {languageText[language].toggleMode}
+            </Button>
+
+            <Button
+                variant="contained"
+                color="default"
+                onClick={toggleLanguage}
+                style={{
+                    position: 'absolute',
+                    bottom: 20,
+                    left: 100,
+                    zIndex: 10
+                }}
+            >
+                {language === "en" ? "Switch to Polish" : "Switch to English"}
             </Button>
 
             <Typography
@@ -234,13 +282,13 @@ const MainPage = () => {
                 gutterBottom
                 style={{ animation: 'fadeIn 2s ease-in-out' }}
             >
-                Welcome to the Main Page!
+                {languageText[language].welcome}
             </Typography>
 
             <Container maxWidth="sm">
                 <Paper elevation={3} style={{ padding: '20px', width: '100%', marginBottom: '20px' }}>
                     <TextField
-                        label="What's on your mind?"
+                        label={languageText[language].postPlaceholder}
                         fullWidth
                         multiline
                         rows={4}
@@ -258,7 +306,7 @@ const MainPage = () => {
                         onClick={handlePostSubmit}
                         style={{ marginTop: '10px' }}
                     >
-                        Post
+                        {languageText[language].postButton}
                     </Button>
                 </Paper>
 
@@ -329,7 +377,7 @@ const MainPage = () => {
                                         onClick={() => handleToggleLikePost(post.id)}
                                         style={{ marginRight: '10px' }}
                                     >
-                                        {post.likedBy.includes(email) ? "Unlike" : "Like"}
+                                        {post.likedBy.includes(email) ? languageText[language].unlike : languageText[language].like}
                                     </Button>
                                     <Typography variant="body2">{post.likes} Likes</Typography>
                                 </Box>
@@ -359,7 +407,7 @@ const MainPage = () => {
                                     onClick={() => handleShowComments(post.id)}
                                     style={{ marginTop: '10px' }}
                                 >
-                                    Comments
+                                    {languageText[language].comments}
                                 </Button>
                                 {comments[post.id] && (
                                     <Box mt={2}>
@@ -377,7 +425,7 @@ const MainPage = () => {
                                             </Paper>
                                         ))}
                                         <TextField
-                                            label="Add a comment"
+                                            label={languageText[language].addComment}
                                             fullWidth
                                             multiline
                                             rows={2}
@@ -391,7 +439,7 @@ const MainPage = () => {
                                             onClick={() => handleAddComment(post.id)}
                                             style={{ marginTop: '10px' }}
                                         >
-                                            Comment
+                                            {languageText[language].commentButton}
                                         </Button>
                                     </Box>
                                 )}
