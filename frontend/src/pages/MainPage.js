@@ -1,4 +1,3 @@
-// MainPage.js
 import React, { useState, useEffect } from "react";
 import { Box, Typography, Button, TextField, Paper, Container, Avatar } from "@mui/material";
 import Confetti from "react-confetti";
@@ -132,17 +131,18 @@ const MainPage = () => {
         const response = await fetch(`/posts/${postId}/comment?email=${email}`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "text/plain",
             },
-            body: JSON.stringify(trimmedComment),
+            body: trimmedComment,
         });
 
         if (response.ok) {
-            const comment = await response.json();
-            setComments(prevComments => ({
-                ...prevComments,
-                [postId]: [...(prevComments[postId] || []), comment]
-            }));
+            // Fetch the latest comments after adding a new comment
+            const commentsResponse = await fetch(`/posts/${postId}/comments`);
+            if (commentsResponse.ok) {
+                const data = await commentsResponse.json();
+                setComments(prevComments => ({ ...prevComments, [postId]: data }));
+            }
             setNewComment("");
         }
     };
@@ -226,9 +226,9 @@ const MainPage = () => {
                 {posts.map((post) => (
                     <Paper key={post.id} elevation={3} style={{ padding: '20px', width: '100%', marginBottom: '10px' }}>
                         <Box display="flex" alignItems="center" mb={2}>
-                            <Avatar src={post.userProfilePictureUrl} alt={post.userName} />
+                            <Avatar src={post.user.picture} alt={post.user.username} />
                             <Typography variant="h6" style={{ marginLeft: '10px' }}>
-                                {post.userName}
+                                {post.user.username}
                             </Typography>
                         </Box>
                         {editingPost && editingPost.id === post.id ? (

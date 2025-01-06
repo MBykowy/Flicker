@@ -43,7 +43,6 @@ public class PostController {
         Post post = postService.createPost(postRequest.getEmail(), postRequest.getContent(), postRequest.getMediaUrl());
         return ResponseEntity.ok(post);
     }
-
     /**
      * Pobiera wszystkie posty.
      *
@@ -90,9 +89,9 @@ public class PostController {
      * @return dodany komentarz w obiekcie ResponseEntity
      */
     @PostMapping("/{postId}/comment")
-    public ResponseEntity<String> addComment(@PathVariable Long postId, @RequestParam String email, @RequestBody String content) {
+    public ResponseEntity<Comment> addComment(@PathVariable Long postId, @RequestParam String email, @RequestBody String content) {
         Comment comment = postService.addComment(postId, email, content);
-        return ResponseEntity.ok(comment.getContent());
+        return ResponseEntity.ok(comment);
     }
     /**
      * Pobiera wszystkie komentarze do posta.
