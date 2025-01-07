@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Button, TextField, Paper, Container, Avatar } from "@mui/material";
+import { Box, Typography, TextField, Paper, Container, Avatar, Dialog, DialogTitle, DialogContent, DialogActions, Tabs, Tab, Button } from "@mui/material";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 import { useAuth } from "../context/AuthContext";
@@ -18,12 +18,15 @@ const MainPage = () => {
     const [editMediaUrl, setEditMediaUrl] = useState("");
     const [comments, setComments] = useState({});
     const [newComment, setNewComment] = useState("");
+    const [theme, setTheme] = useState("light");
+    const [language, setLanguage] = useState("en");
 
-    const [theme, setTheme] = useState("light");  // State to track the current theme
-    const [language, setLanguage] = useState("en"); // State to track the selected language
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [selectedTab, setSelectedTab] = useState("forYou");
 
     useEffect(() => {
-        // Check localStorage for the theme and language preferences and set them
         const savedTheme = localStorage.getItem("theme");
         const savedLanguage = localStorage.getItem("language");
 
@@ -41,16 +44,12 @@ const MainPage = () => {
     }, []);
 
     useEffect(() => {
-        // Set the background color and theme class based on the current theme
         document.body.style.backgroundColor = theme === "light" ? "lightblue" : "#333";
         document.body.style.color = theme === "light" ? "#000" : "#fff";
-
-        // Save the theme preference in localStorage
         localStorage.setItem("theme", theme);
     }, [theme]);
 
     useEffect(() => {
-        // Save the language preference in localStorage
         localStorage.setItem("language", language);
     }, [language]);
 
@@ -172,7 +171,6 @@ const MainPage = () => {
         });
 
         if (response.ok) {
-            // Fetch the latest comments after adding a new comment
             const commentsResponse = await fetch(`/posts/${postId}/comments`);
             if (commentsResponse.ok) {
                 const data = await commentsResponse.json();
@@ -190,6 +188,30 @@ const MainPage = () => {
         setLanguage((prevLanguage) => (prevLanguage === "en" ? "pl" : "en"));
     };
 
+    const handleUserClick = (user) => {
+        if (user.email !== email) {
+            setSelectedUser(user);
+            setIsFollowing(false); // Reset follow state
+            setDialogOpen(true);
+        }
+    };
+
+    const handleFollowClick = () => {
+        setIsFollowing((prev) => !prev);
+    };
+
+    const handleCloseDialog = () => {
+        setDialogOpen(false);
+        setSelectedUser(null);
+    };
+
+    const handleTabChange = (event, newValue) => {
+        setSelectedTab(newValue);
+    };
+
+    const filteredPosts = selectedTab === "following"
+        ? posts.filter(post => post.user.followedBy && post.user.followedBy.includes(email))
+        : posts;
     return (
         <Box
             display="flex"
@@ -271,6 +293,16 @@ const MainPage = () => {
 
             <Container maxWidth="sm">
                 <Paper elevation={3} style={{ padding: '20px', width: '100%', marginBottom: '20px' }}>
+                    <Tabs
+                        value={selectedTab}
+                        onChange={handleTabChange}
+                        indicatorColor="primary"
+                        textColor="primary"
+                        centered
+                    >
+                        <Tab label="For You" value="forYou" />
+                        <Tab label="Following" value="following" />
+                    </Tabs>
                     <TextField
                         label={language === "en" ? "What's on your mind?" : "Co masz na myśli?"}
                         fullWidth
@@ -278,6 +310,7 @@ const MainPage = () => {
                         rows={4}
                         value={newPost}
                         onChange={(e) => setNewPost(e.target.value)}
+                        style={{ marginTop: '10px' }}
                     />
                     <input
                         type="file"
@@ -294,11 +327,20 @@ const MainPage = () => {
                     </Button>
                 </Paper>
 
-                {posts.map((post) => (
+                {filteredPosts.map((post) => (
                     <Paper key={post.id} elevation={3} style={{ padding: '20px', width: '100%', marginBottom: '10px' }}>
                         <Box display="flex" alignItems="center" mb={2}>
-                            <Avatar src={post.user.picture} alt={post.user.username} />
-                            <Typography variant="h6" style={{ marginLeft: '10px' }}>
+                            <Avatar
+                                src={post.user.picture}
+                                alt={post.user.username}
+                                onClick={() => handleUserClick(post.user)}
+                                style={{ cursor: 'pointer' }}
+                            />
+                            <Typography
+                                variant="h6"
+                                style={{ marginLeft: '10px', cursor: 'pointer' }}
+                                onClick={() => handleUserClick(post.user)}
+                            >
                                 {post.user.username}
                             </Typography>
                         </Box>
@@ -346,7 +388,6 @@ const MainPage = () => {
                                         ) : (
                                             <video controls style={{ maxWidth: '100%' }}>
                                                 <source src={post.mediaUrl} type="video/mp4" />
-                                                Your browser does not support the video tag.
                                             </video>
                                         )}
                                     </Box>
@@ -369,9 +410,9 @@ const MainPage = () => {
                                     <>
                                         <Button
                                             variant="contained"
-                                            color="secondary"
+                                            color="primary"
                                             onClick={() => handleEditPost(post)}
-                                            style={{ marginTop: '10px', marginRight: '10px' }}
+                                            style={{ marginRight: '10px' }}
                                         >
                                             {language === "en" ? "Edit" : "Edytuj"}
                                         </Button>
@@ -379,7 +420,6 @@ const MainPage = () => {
                                             variant="contained"
                                             color="secondary"
                                             onClick={() => handleDeletePost(post.id)}
-                                            style={{ marginTop: '10px' }}
                                         >
                                             {language === "en" ? "Delete" : "Usuń"}
                                         </Button>
@@ -396,16 +436,11 @@ const MainPage = () => {
                                 {comments[post.id] && (
                                     <Box mt={2}>
                                         {comments[post.id].map(comment => (
-                                            <Paper key={comment.id} elevation={2} style={{ padding: '10px', marginBottom: '10px' }}>
-                                                {comment.user && (
-                                                    <>
-                                                        <Typography variant="body2">{comment.user.username}</Typography>
-                                                        <Typography variant="body1">{comment.content}</Typography>
-                                                        <Typography variant="caption" color="textSecondary">
-                                                            {new Date(comment.createdAt).toLocaleString()}
-                                                        </Typography>
-                                                    </>
-                                                )}
+                                            <Paper key={comment.id} style={{ padding: '10px', marginBottom: '10px' }}>
+                                                <Typography variant="body2">{comment.content}</Typography>
+                                                <Typography variant="caption" color="textSecondary">
+                                                    {new Date(comment.createdAt).toLocaleString()}
+                                                </Typography>
                                             </Paper>
                                         ))}
                                         <TextField
@@ -423,7 +458,7 @@ const MainPage = () => {
                                             onClick={() => handleAddComment(post.id)}
                                             style={{ marginTop: '10px' }}
                                         >
-                                            {language === "en" ? "Comment" : "Komentuj"}
+                                            {language === "en" ? "Comment" : "Komentarz"}
                                         </Button>
                                     </Box>
                                 )}
@@ -432,6 +467,28 @@ const MainPage = () => {
                     </Paper>
                 ))}
             </Container>
+
+            <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+                <DialogTitle>
+                    <Box display="flex" alignItems="center">
+                        <Avatar src={selectedUser?.picture} alt={selectedUser?.username} />
+                        <Typography variant="h6" style={{ marginLeft: '10px' }}>
+                            {selectedUser?.username}
+                        </Typography>
+                    </Box>
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>{selectedUser?.bio}</Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleFollowClick} color="primary">
+                        {isFollowing ? "Unfollow" : "Follow"}
+                    </Button>
+                    <Button onClick={handleCloseDialog} color="secondary">
+                        Block
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };
