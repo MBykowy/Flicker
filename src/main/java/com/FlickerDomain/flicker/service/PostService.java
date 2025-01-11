@@ -142,5 +142,20 @@ public class PostService {
         post.setMediaUrl(newMediaUrl);
         return postRepository.save(post);
     }
+    public List<Post> getPostsSortedByLikesDesc() {
+        return postRepository.findAllByOrderByLikesDesc();
+    }
+
+    public List<Post> getPostsSortedByLikesAsc() {
+        return postRepository.findAllByOrderByLikesAsc();
+    }
+
+    public List<Post> getPostsSortedByDateDesc() {
+        return postRepository.findAllByOrderByCreatedAtDesc();
+    }
+
+    public List<Post> getPostsSortedByDateAsc() {
+        return postRepository.findAllByOrderByCreatedAtAsc();
+    }
 }
 

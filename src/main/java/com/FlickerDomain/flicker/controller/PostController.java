@@ -122,5 +122,27 @@ public class PostController {
         Post post = postService.editPost(postId, email, content, mediaUrl);
         return ResponseEntity.ok(post);
     }
+    @GetMapping("/sorted/likes/desc")
+    public ResponseEntity<List<Post>> getPostsSortedByLikesDesc() {
+        List<Post> posts = postService.getPostsSortedByLikesDesc();
+        return ResponseEntity.ok(posts);
+    }
 
+    @GetMapping("/sorted/likes/asc")
+    public ResponseEntity<List<Post>> getPostsSortedByLikesAsc() {
+        List<Post> posts = postService.getPostsSortedByLikesAsc();
+        return ResponseEntity.ok(posts);
+    }
+
+    @GetMapping("/sorted/date/desc")
+    public ResponseEntity<List<Post>> getPostsSortedByDateDesc() {
+        List<Post> posts = postService.getPostsSortedByDateDesc();
+        return ResponseEntity.ok(posts);
+    }
+
+    @GetMapping("/sorted/date/asc")
+    public ResponseEntity<List<Post>> getPostsSortedByDateAsc() {
+        List<Post> posts = postService.getPostsSortedByDateAsc();
+        return ResponseEntity.ok(posts);
+    }
 }

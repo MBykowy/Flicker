@@ -20,6 +20,7 @@ const MainPage = () => {
     const [newComment, setNewComment] = useState("");
     const [theme, setTheme] = useState("light");
     const [language, setLanguage] = useState("en");
+    const [filter, setFilter] = useState('mostLikes');
 
     const [selectedUser, setSelectedUser] = useState(null);
     const [isFollowing, setIsFollowing] = useState(false);
@@ -54,18 +55,29 @@ const MainPage = () => {
     }, [language]);
 
     useEffect(() => {
-        const fetchPosts = async () => {
-            const response = await fetch(`/posts`);
-            const data = await response.json();
-            setPosts(data);
-        };
+        fetchPosts();
+    }, [filter]);
 
+    useEffect(() => {
         const emailFromCookie = document.cookie.split("; ").find(row => row.startsWith("email="))?.split("=")[1];
         setEmail(emailFromCookie);
-        if (emailFromCookie) {
-            fetchPosts();
+    }, []);
+
+    const fetchPosts = async () => {
+        let url = '/posts';
+        if (filter === 'mostLikes') {
+            url = '/posts/sorted/likes/desc';
+        } else if (filter === 'leastLikes') {
+            url = '/posts/sorted/likes/asc';
+        } else if (filter === 'newest') {
+            url = '/posts/sorted/date/desc';
+        } else if (filter === 'oldest') {
+            url = '/posts/sorted/date/asc';
         }
-    }, [email]);
+        const response = await fetch(url);
+        const data = await response.json();
+        setPosts(data);
+    };
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
@@ -212,6 +224,7 @@ const MainPage = () => {
     const filteredPosts = selectedTab === "following"
         ? posts.filter(post => post.user.followedBy && post.user.followedBy.includes(email))
         : posts;
+
     return (
         <Box
             display="flex"
@@ -326,6 +339,13 @@ const MainPage = () => {
                         {language === "en" ? "Post" : "Opublikuj"}
                     </Button>
                 </Paper>
+
+                <Box display="flex" justifyContent="center" mb={2}>
+                    <Button onClick={() => setFilter('mostLikes')}>Najwięcej Like</Button>
+                    <Button onClick={() => setFilter('leastLikes')}>Najmniej Like</Button>
+                    <Button onClick={() => setFilter('newest')}>Najnowsze</Button>
+                    <Button onClick={() => setFilter('oldest')}>Najstarsze</Button>
+                </Box>
 
                 {filteredPosts.map((post) => (
                     <Paper key={post.id} elevation={3} style={{ padding: '20px', width: '100%', marginBottom: '10px' }}>
