@@ -5,7 +5,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.io.Serializable;
-
+import jakarta.persistence.*;
+import java.util.Set;
 /**
  * Represents a user in the system.
  * This entity is mapped to a database table using JPA annotations.
@@ -23,6 +24,11 @@ public class User implements Serializable {
     private String bio;
     private String picture;
 
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Follow> following;
+
+    @OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Follow> followers;
     /**
      * Gets the unique identifier of the user.
      *
@@ -130,4 +136,22 @@ public class User implements Serializable {
     public void setPicture(String picture) {
         this.picture = picture;
     }
+
+    public Set<Follow> getFollowing() {
+        return following;
+    }
+
+    public void setFollowing(Set<Follow> following) {
+        this.following = following;
+    }
+
+    public Set<Follow> getFollowers() {
+        return followers;
+    }
+
+    public void setFollowers(Set<Follow> followers) {
+        this.followers = followers;
+    }
+
+
 }

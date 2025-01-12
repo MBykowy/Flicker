@@ -203,13 +203,32 @@ const MainPage = () => {
     const handleUserClick = (user) => {
         if (user.email !== email) {
             setSelectedUser(user);
-            setIsFollowing(false); // Reset follow state
+            checkIfFollowing(user.email);
             setDialogOpen(true);
         }
     };
 
-    const handleFollowClick = () => {
-        setIsFollowing((prev) => !prev);
+    const checkIfFollowing = async (followedEmail) => {
+        const response = await fetch(`/api/follow/check?followerEmail=${email}&followedEmail=${followedEmail}`);
+        if (response.ok) {
+            const isFollowing = await response.json();
+            setIsFollowing(isFollowing);
+        }
+    };
+
+    const handleFollowClick = async () => {
+        const url = isFollowing ? "/api/follow/unfollow" : "/api/follow/follow";
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ followerEmail: email, followedEmail: selectedUser.email }),
+        });
+
+        if (response.ok) {
+            setIsFollowing(!isFollowing);
+        }
     };
 
     const handleCloseDialog = () => {

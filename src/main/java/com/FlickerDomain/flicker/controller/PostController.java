@@ -145,4 +145,9 @@ public class PostController {
         List<Post> posts = postService.getPostsSortedByDateAsc();
         return ResponseEntity.ok(posts);
     }
+    @GetMapping("/following")
+    public ResponseEntity<List<Post>> getPostsFromFollowing(@RequestParam String email) {
+        List<Post> posts = postService.getPostsFromFollowing(email);
+        return ResponseEntity.ok(posts);
+    }
 }

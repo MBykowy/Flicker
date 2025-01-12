@@ -2,6 +2,7 @@ package com.FlickerDomain.flicker.service;
 
 import com.FlickerDomain.flicker.model.Comment;
 import com.FlickerDomain.flicker.model.Post;
+import com.FlickerDomain.flicker.model.Follow;
 import com.FlickerDomain.flicker.model.User;
 import com.FlickerDomain.flicker.repository.CommentRepository;
 import com.FlickerDomain.flicker.repository.PostRepository;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Klasa PostService dostarcza logikę biznesową dla operacji związanych z postami,
@@ -156,6 +159,11 @@ public class PostService {
 
     public List<Post> getPostsSortedByDateAsc() {
         return postRepository.findAllByOrderByCreatedAtAsc();
+    }
+    public List<Post> getPostsFromFollowing(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        Set<User> followedUsers = user.getFollowing().stream().map(Follow::getFollowed).collect(Collectors.toSet());
+        return postRepository.findByUserIn(followedUsers);
     }
 }
 
