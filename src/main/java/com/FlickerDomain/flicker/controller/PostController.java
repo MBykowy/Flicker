@@ -1,3 +1,4 @@
+// PostController.java
 package com.FlickerDomain.flicker.controller;
 
 import com.FlickerDomain.flicker.model.Comment;
@@ -43,6 +44,7 @@ public class PostController {
         Post post = postService.createPost(postRequest.getEmail(), postRequest.getContent(), postRequest.getMediaUrl());
         return ResponseEntity.ok(post);
     }
+
     /**
      * Pobiera wszystkie posty.
      *
@@ -93,6 +95,7 @@ public class PostController {
         Comment comment = postService.addComment(postId, email, content);
         return ResponseEntity.ok(comment);
     }
+
     /**
      * Pobiera wszystkie komentarze do posta.
      *
@@ -117,34 +120,71 @@ public class PostController {
         return ResponseEntity.ok(fileUrl);
     }
 
+    /**
+     * Edytuje istniejący post.
+     *
+     * @param postId   ID posta do edycji
+     * @param email    email użytkownika edytującego post
+     * @param content  nowa treść posta
+     * @param mediaUrl nowy URL multimediów do posta
+     * @return zaktualizowany post w obiekcie ResponseEntity
+     */
     @PutMapping("/{postId}")
     public ResponseEntity<Post> editPost(@PathVariable Long postId, @RequestParam String email, @RequestParam String content, @RequestParam String mediaUrl) {
         Post post = postService.editPost(postId, email, content, mediaUrl);
         return ResponseEntity.ok(post);
     }
+
+    /**
+     * Pobiera posty posortowane malejąco po liczbie polubień.
+     *
+     * @return lista postów posortowanych po liczbie polubień w obiekcie ResponseEntity
+     */
     @GetMapping("/sorted/likes/desc")
     public ResponseEntity<List<Post>> getPostsSortedByLikesDesc() {
         List<Post> posts = postService.getPostsSortedByLikesDesc();
         return ResponseEntity.ok(posts);
     }
 
+    /**
+     * Pobiera posty posortowane rosnąco po liczbie polubień.
+     *
+     * @return lista postów posortowanych po liczbie polubień w obiekcie ResponseEntity
+     */
     @GetMapping("/sorted/likes/asc")
     public ResponseEntity<List<Post>> getPostsSortedByLikesAsc() {
         List<Post> posts = postService.getPostsSortedByLikesAsc();
         return ResponseEntity.ok(posts);
     }
 
+    /**
+     * Pobiera posty posortowane malejąco po dacie.
+     *
+     * @return lista postów posortowanych po dacie w obiekcie ResponseEntity
+     */
     @GetMapping("/sorted/date/desc")
     public ResponseEntity<List<Post>> getPostsSortedByDateDesc() {
         List<Post> posts = postService.getPostsSortedByDateDesc();
         return ResponseEntity.ok(posts);
     }
 
+    /**
+     * Pobiera posty posortowane rosnąco po dacie.
+     *
+     * @return lista postów posortowanych po dacie w obiekcie ResponseEntity
+     */
     @GetMapping("/sorted/date/asc")
     public ResponseEntity<List<Post>> getPostsSortedByDateAsc() {
         List<Post> posts = postService.getPostsSortedByDateAsc();
         return ResponseEntity.ok(posts);
     }
+
+    /**
+     * Pobiera posty od osób, które użytkownik śledzi.
+     *
+     * @param email email użytkownika
+     * @return lista postów od osób, które użytkownik śledzi
+     */
     @GetMapping("/following")
     public ResponseEntity<List<Post>> getPostsFromFollowing(@RequestParam String email) {
         List<Post> posts = postService.getPostsFromFollowing(email);

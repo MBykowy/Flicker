@@ -41,7 +41,7 @@ public class Post {
     /**
      * Pobiera ID posta.
      *
-     * @return ID posta jako Long
+     * @return ID posta jako Long.
      */
     public Long getId() {
         return id;
@@ -50,7 +50,7 @@ public class Post {
     /**
      * Ustawia ID posta.
      *
-     * @param id ID posta jako Long
+     * @param id ID posta jako Long.
      */
     public void setId(Long id) {
         this.id = id;
@@ -59,7 +59,7 @@ public class Post {
     /**
      * Pobiera użytkownika, który utworzył post.
      *
-     * @return obiekt User, który utworzył post
+     * @return obiekt User, który utworzył post.
      */
     public User getUser() {
         return user;
@@ -68,7 +68,7 @@ public class Post {
     /**
      * Ustawia użytkownika, który utworzył post.
      *
-     * @param user obiekt User, który utworzył post
+     * @param user obiekt User, który utworzył post.
      */
     public void setUser(User user) {
         this.user = user;
@@ -77,7 +77,7 @@ public class Post {
     /**
      * Pobiera treść posta.
      *
-     * @return treść posta jako String
+     * @return treść posta jako String.
      */
     public String getContent() {
         return content;
@@ -86,7 +86,7 @@ public class Post {
     /**
      * Ustawia treść posta.
      *
-     * @param content treść posta jako String
+     * @param content treść posta jako String.
      */
     public void setContent(String content) {
         this.content = content;
@@ -95,7 +95,7 @@ public class Post {
     /**
      * Pobiera datę utworzenia posta.
      *
-     * @return data utworzenia posta jako obiekt Date
+     * @return data utworzenia posta jako obiekt Date.
      */
     public Date getCreatedAt() {
         return createdAt;
@@ -104,7 +104,7 @@ public class Post {
     /**
      * Ustawia datę utworzenia posta.
      *
-     * @param createdAt data utworzenia posta jako obiekt Date
+     * @param createdAt data utworzenia posta jako obiekt Date.
      */
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
@@ -113,7 +113,7 @@ public class Post {
     /**
      * Pobiera URL multimediów związanych z postem.
      *
-     * @return URL multimediów jako String
+     * @return URL multimediów jako String.
      */
     public String getMediaUrl() {
         return mediaUrl;
@@ -122,7 +122,7 @@ public class Post {
     /**
      * Ustawia URL multimediów związanych z postem.
      *
-     * @param mediaUrl URL multimediów jako String
+     * @param mediaUrl URL multimediów jako String.
      */
     public void setMediaUrl(String mediaUrl) {
         this.mediaUrl = mediaUrl;
@@ -131,7 +131,7 @@ public class Post {
     /**
      * Pobiera liczbę polubień posta.
      *
-     * @return liczba polubień jako int
+     * @return liczba polubień jako int.
      */
     public int getLikes() {
         return likes;
@@ -140,7 +140,7 @@ public class Post {
     /**
      * Ustawia liczbę polubień posta.
      *
-     * @param likes liczba polubień jako int
+     * @param likes liczba polubień jako int.
      */
     public void setLikes(int likes) {
         this.likes = likes;
@@ -149,7 +149,7 @@ public class Post {
     /**
      * Pobiera zestaw użytkowników, którzy polubili post.
      *
-     * @return zestaw użytkowników jako Set<User>
+     * @return zestaw użytkowników jako Set<User>.
      */
     public Set<User> getLikedBy() {
         return likedBy;
@@ -158,7 +158,7 @@ public class Post {
     /**
      * Ustawia zestaw użytkowników, którzy polubili post.
      *
-     * @param likedBy zestaw użytkowników jako Set<User>
+     * @param likedBy zestaw użytkowników jako Set<User>.
      */
     public void setLikedBy(Set<User> likedBy) {
         this.likedBy = likedBy;

@@ -1,3 +1,4 @@
+// RegistrationController.java
 package com.FlickerDomain.flicker.controller;
 
 import com.FlickerDomain.flicker.service.UserService;

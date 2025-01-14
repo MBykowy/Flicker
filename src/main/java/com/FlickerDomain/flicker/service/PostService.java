@@ -21,8 +21,19 @@ import java.util.stream.Collectors;
 @Service
 public class PostService {
 
+    /**
+     * Repozytorium do zarządzania postami.
+     */
     private final PostRepository postRepository;
+
+    /**
+     * Repozytorium do zarządzania użytkownikami.
+     */
     private final UserRepository userRepository;
+
+    /**
+     * Repozytorium do zarządzania komentarzami.
+     */
     private final CommentRepository commentRepository;
 
     /**
@@ -135,6 +146,16 @@ public class PostService {
         return commentRepository.findByPostId(postId);
     }
 
+    /**
+     * Edytuje post.
+     *
+     * @param postId       ID posta
+     * @param email        email użytkownika próbującego edytować post
+     * @param newContent   nowa treść posta
+     * @param newMediaUrl  nowy adres URL multimediów
+     * @return zaktualizowany post
+     * @throws RuntimeException jeśli post nie istnieje lub użytkownik nie jest autorem posta
+     */
     @Transactional
     public Post editPost(Long postId, String email, String newContent, String newMediaUrl) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
@@ -145,25 +166,53 @@ public class PostService {
         post.setMediaUrl(newMediaUrl);
         return postRepository.save(post);
     }
+
+    /**
+     * Pobiera listę postów posortowanych malejąco według liczby polubień.
+     *
+     * @return lista postów posortowanych według liczby polubień
+     */
     public List<Post> getPostsSortedByLikesDesc() {
         return postRepository.findAllByOrderByLikesDesc();
     }
 
+    /**
+     * Pobiera listę postów posortowanych rosnąco według liczby polubień.
+     *
+     * @return lista postów posortowanych według liczby polubień
+     */
     public List<Post> getPostsSortedByLikesAsc() {
         return postRepository.findAllByOrderByLikesAsc();
     }
 
+    /**
+     * Pobiera listę postów posortowanych malejąco według daty utworzenia.
+     *
+     * @return lista postów posortowanych według daty utworzenia
+     */
     public List<Post> getPostsSortedByDateDesc() {
         return postRepository.findAllByOrderByCreatedAtDesc();
     }
 
+    /**
+     * Pobiera listę postów posortowanych rosnąco według daty utworzenia.
+     *
+     * @return lista postów posortowanych według daty utworzenia
+     */
     public List<Post> getPostsSortedByDateAsc() {
         return postRepository.findAllByOrderByCreatedAtAsc();
     }
+
+    /**
+     * Pobiera posty od użytkowników, których dany użytkownik śledzi.
+     *
+     * @param email email użytkownika
+     * @return lista postów od śledzonych użytkowników
+     * @throws RuntimeException jeśli użytkownik nie istnieje
+     */
     public List<Post> getPostsFromFollowing(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         Set<User> followedUsers = user.getFollowing().stream().map(Follow::getFollowed).collect(Collectors.toSet());
         return postRepository.findByUserIn(followedUsers);
     }
 }
-

@@ -1,3 +1,4 @@
+// LoginController.java
 package com.FlickerDomain.flicker.controller;
 
 import com.FlickerDomain.flicker.service.UserService;
@@ -34,13 +35,14 @@ public class LoginController {
     public String loginUser(@RequestParam("username") String username,
                             @RequestParam("password") String password,
                             Model model) {
+        // Sprawdzenie, czy dane logowania są poprawne
         boolean isAuthenticated = userService.authenticate(username, password);
 
         if (isAuthenticated) {
-            // Przekierowanie na stronę po pomyślnym logowaniu
+            // Jeśli logowanie jest udane, przekierowanie do strony głównej
             return "redirect:/dashboard";
         } else {
-            // Dodanie komunikatu o błędzie do modelu i ponowne załadowanie strony logowania
+            // Jeśli dane są nieprawidłowe, przekierowanie na stronę logowania z komunikatem o błędzie
             model.addAttribute("error", "Nieprawidłowa nazwa użytkownika lub hasło.");
             return "login";
         }

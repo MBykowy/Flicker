@@ -20,7 +20,9 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * Controller for handling authentication-related requests.
+ * Kontroler obsługujący żądania związane z autentykacją użytkownika,
+ * takie jak rejestracja, logowanie, wylogowywanie oraz aktualizacja danych użytkownika.
+ * Dodatkowo obsługuje również walidację CAPTCHA podczas procesu logowania.
  */
 @Controller
 @RequestMapping("/auth")
@@ -29,19 +31,19 @@ public class AuthController {
     private final UserService userService;
 
     /**
-     * Constructor for AuthController.
+     * Konstruktor kontrolera.
      *
-     * @param userService the user service to be used for user operations
+     * @param userService serwis użytkownika, który będzie używany do operacji na użytkownikach
      */
     public AuthController(UserService userService) {
         this.userService = userService;
     }
 
     /**
-     * Registers a new user.
+     * Rejestruje nowego użytkownika.
      *
-     * @param request the registration request containing user details
-     * @return a response entity indicating the result of the registration
+     * @param request żądanie rejestracyjne zawierające dane użytkownika
+     * @return odpowiedź wskazującą rezultat procesu rejestracji
      */
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
@@ -50,12 +52,13 @@ public class AuthController {
     }
 
     /**
-     * Logs in a user.
+     * Loguje użytkownika.
+     * Sprawdza dane logowania, waliduje odpowiedź CAPTCHA i ustawia sesję oraz ciasteczko.
      *
-     * @param loginRequest the login request containing user credentials
-     * @param request the HTTP servlet request
-     * @param response the HTTP servlet response
-     * @return a response entity indicating the result of the login attempt
+     * @param loginRequest dane logowania zawierające dane użytkownika
+     * @param request żądanie HTTP
+     * @param response odpowiedź HTTP
+     * @return odpowiedź wskazującą rezultat logowania
      */
     @PostMapping("/user-login")
     public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
@@ -63,26 +66,23 @@ public class AuthController {
         String password = loginRequest.getPassword();
         String captchaResponse = loginRequest.getCaptchaResponse();
 
-        System.out.println("Email: " + email);
-
-        // Validate CAPTCHA
+        // Walidacja CAPTCHA
         if (!validateCaptcha(captchaResponse)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Captcha validation failed");
         }
 
-        // Login logic
+        // Logowanie użytkownika
         boolean isAuthenticated = userService.authenticateByEmail(email, password);
         if (isAuthenticated) {
-            // Set session attribute after successful login
-            HttpSession session = request.getSession(true);  // Creates a session if none exists
-            session.setAttribute("user", email); // Store the user's email in the session
+            // Ustawienie atrybutu sesji po udanym logowaniu
+            HttpSession session = request.getSession(true);  // Tworzy sesję, jeśli nie istnieje
+            session.setAttribute("user", email); // Przechowywanie adresu e-mail w sesji
 
-            // Create a cookie with the user's email
+            // Utworzenie ciasteczka z e-mailem użytkownika
             Cookie emailCookie = new Cookie("email", email);
-            //emailCookie.setHttpOnly(true); // Protects the cookie from JavaScript access
-            emailCookie.setSecure(false); // Only through HTTPS
-            emailCookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
-            emailCookie.setPath("/"); // Available throughout the site
+            emailCookie.setSecure(false); // Zezwolenie na połączenie bez HTTPS
+            emailCookie.setMaxAge(7 * 24 * 60 * 60); // Ciasteczko ważne przez 7 dni
+            emailCookie.setPath("/"); // Dostępne w całej aplikacji
             response.addCookie(emailCookie);
 
             return ResponseEntity.ok("Login successful");
@@ -92,24 +92,23 @@ public class AuthController {
     }
 
     /**
-     * Checks if a user is authenticated.
+     * Sprawdza, czy użytkownik jest zalogowany.
      *
-     * @param request the HTTP servlet request
-     * @return a response entity indicating whether the user is authenticated
+     * @param request żądanie HTTP
+     * @return odpowiedź wskazującą, czy użytkownik jest zalogowany
      */
     @GetMapping("/check-auth")
     public ResponseEntity<Boolean> checkAuth(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);  // Retrieve the existing session, if any
+        HttpSession session = request.getSession(false);  // Pobiera istniejącą sesję, jeśli istnieje
         boolean isAuthenticated = (session != null && session.getAttribute("user") != null);
         return ResponseEntity.ok(isAuthenticated);
     }
 
     /**
-     * Updates the user's profile picture.
+     * Aktualizuje zdjęcie profilowe użytkownika.
      *
-     * @param email the user's email
-     * @param request a map containing the new picture URL
-     * @return a response entity indicating the result of the update
+     * @param request mapa zawierająca e-mail użytkownika i nowe URL zdjęcia
+     * @return odpowiedź wskazującą rezultat aktualizacji
      */
     @PostMapping("/update-picture")
     public ResponseEntity<?> updatePicture(@RequestBody Map<String, String> request) {
@@ -119,25 +118,23 @@ public class AuthController {
         return ResponseEntity.ok(Collections.singletonMap("success", true));
     }
 
-
     /**
-     * Logs out a user.
+     * Wylogowuje użytkownika.
+     * Usuwa sesję oraz ciasteczko przechowujące e-mail.
      *
-     * @param request the HTTP servlet request
-     * @param response the HTTP servlet response
-     * @return a response entity indicating the result of the logout attempt
+     * @param request żądanie HTTP
+     * @param response odpowiedź HTTP
+     * @return odpowiedź wskazującą rezultat wylogowania
      */
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
-        HttpSession session = request.getSession(false);  // Retrieve the session if it exists
+        HttpSession session = request.getSession(false);  // Pobiera istniejącą sesję, jeśli istnieje
         if (session != null) {
-            session.invalidate();  // Invalidate the session to log out the user
+            session.invalidate();  // Inwalidacja sesji, co skutkuje wylogowaniem użytkownika
         }
-        // Remove the email cookie
+        // Usunięcie ciasteczka z e-mailem użytkownika
         Cookie emailCookie = new Cookie("email", null);
-        emailCookie.setHttpOnly(true);
-        emailCookie.setSecure(true);
-        emailCookie.setMaxAge(0); // Delete cookie
+        emailCookie.setMaxAge(0); // Ustalenie czasu życia ciasteczka na 0, co powoduje jego usunięcie
         emailCookie.setPath("/");
         response.addCookie(emailCookie);
 
@@ -145,10 +142,10 @@ public class AuthController {
     }
 
     /**
-     * Retrieves user details.
+     * Pobiera dane użytkownika.
      *
-     * @param email the user's email
-     * @return a response entity containing the user details
+     * @param email adres e-mail użytkownika
+     * @return odpowiedź zawierająca dane użytkownika
      */
     @GetMapping("/user-details")
     public ResponseEntity<User> getUserDetails(@RequestParam String email) {
@@ -157,10 +154,10 @@ public class AuthController {
     }
 
     /**
-     * Updates the user's username.
+     * Aktualizuje nazwę użytkownika.
      *
-     * @param request a map containing the user's email and new username
-     * @return a response entity indicating the result of the update
+     * @param request mapa zawierająca e-mail użytkownika i nową nazwę użytkownika
+     * @return odpowiedź wskazującą rezultat aktualizacji
      */
     @PostMapping("/update-username")
     public ResponseEntity<?> updateUsername(@RequestBody Map<String, String> request) {
@@ -171,10 +168,10 @@ public class AuthController {
     }
 
     /**
-     * Updates the user's bio.
+     * Aktualizuje biografię użytkownika.
      *
-     * @param request a map containing the user's email and new bio
-     * @return a response entity indicating the result of the update
+     * @param request mapa zawierająca e-mail użytkownika i nową biografię
+     * @return odpowiedź wskazującą rezultat aktualizacji
      */
     @PostMapping("/update-bio")
     public ResponseEntity<?> updateBio(@RequestBody Map<String, String> request) {
@@ -185,16 +182,16 @@ public class AuthController {
     }
 
     /**
-     * Validates the CAPTCHA response.
+     * Waliduje odpowiedź CAPTCHA.
      *
-     * @param captchaResponse the CAPTCHA response from the client
-     * @return true if the CAPTCHA is valid, false otherwise
+     * @param captchaResponse odpowiedź CAPTCHA przesłana przez klienta
+     * @return true, jeśli CAPTCHA jest poprawna, false w przeciwnym razie
      */
     public boolean validateCaptcha(String captchaResponse) {
-        String secretKey = "6LffRYYqAAAAAJEVVPDGDtu_WPrNaVdSqAfsW1Ij"; // Your secret key
+        String secretKey = "6LffRYYqAAAAAJEVVPDGDtu_WPrNaVdSqAfsW1Ij"; // Twój klucz tajny
         String verifyUrl = "https://www.google.com/recaptcha/api/siteverify";
 
-        // Configure WebClient with a larger limit for debugging large responses
+        // Konfiguracja WebClient z większym limitem pamięci na duże odpowiedzi
         WebClient webClient = WebClient.builder()
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024))
@@ -210,9 +207,7 @@ public class AuthController {
                     .bodyToMono(String.class)
                     .block();
 
-            System.out.println("Captcha API Response: " + response);
-
-            // Parse the response
+            // Analiza odpowiedzi z CAPTCHA
             return response != null && response.contains("\"success\": true");
         } catch (Exception e) {
             e.printStackTrace();

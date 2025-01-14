@@ -1,3 +1,4 @@
+// LoginRequest.java
 package com.FlickerDomain.flicker.dto;
 
 /**

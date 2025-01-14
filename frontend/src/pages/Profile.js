@@ -142,7 +142,7 @@ const Profile = () => {
             })
             .catch(() => setError("Failed to update username."));
     };
-    
+
 
     if (loading) return (
         <Container maxWidth="sm">

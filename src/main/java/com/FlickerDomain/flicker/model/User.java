@@ -8,12 +8,13 @@ import jakarta.persistence.Id;
 import java.io.Serializable;
 import jakarta.persistence.*;
 import java.util.Set;
+
 /**
- * Represents a user in the system.
- * This entity is mapped to a database table using JPA annotations.
+ * Reprezentuje użytkownika w systemie.
+ * Ta encja jest mapowana na tabelę w bazie danych za pomocą adnotacji JPA.
  */
-@Entity  // This annotation is important!
-@JsonIgnoreProperties({"following", "followers"})
+@Entity  // Adnotacja wskazująca, że klasa jest encją JPA
+@JsonIgnoreProperties({"following", "followers"})  // Ignoruje pola following i followers przy serializacji JSON
 public class User implements Serializable {
 
     @Id
@@ -26,134 +27,155 @@ public class User implements Serializable {
     private String bio;
     private String picture;
 
+    // Relacja jeden do wielu (One-to-Many) - użytkownik śledzi innych użytkowników
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Follow> following;
 
+    // Relacja jeden do wielu (One-to-Many) - inni użytkownicy śledzą tego użytkownika
     @OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Follow> followers;
+
     /**
-     * Gets the unique identifier of the user.
+     * Pobiera unikalny identyfikator użytkownika.
      *
-     * @return the user ID
+     * @return ID użytkownika
      */
     public Long getId() {
         return id;
     }
 
     /**
-     * Sets the unique identifier of the user.
+     * Ustawia unikalny identyfikator użytkownika.
      *
-     * @param id the user ID
+     * @param id ID użytkownika
      */
     public void setId(Long id) {
         this.id = id;
     }
 
     /**
-     * Gets the username of the user.
+     * Pobiera nazwę użytkownika.
      *
-     * @return the username
+     * @return nazwa użytkownika
      */
     public String getUsername() {
         return username;
     }
 
     /**
-     * Sets the username of the user.
+     * Ustawia nazwę użytkownika.
      *
-     * @param username the username
+     * @param username nazwa użytkownika
      */
     public void setUsername(String username) {
         this.username = username;
     }
 
     /**
-     * Gets the email of the user.
+     * Pobiera email użytkownika.
      *
-     * @return the email
+     * @return email użytkownika
      */
     public String getEmail() {
         return email;
     }
 
     /**
-     * Sets the email of the user.
+     * Ustawia email użytkownika.
      *
-     * @param email the email
+     * @param email email użytkownika
      */
     public void setEmail(String email) {
         this.email = email;
     }
 
     /**
-     * Gets the password of the user.
+     * Pobiera hasło użytkownika.
      *
-     * @return the password
+     * @return hasło użytkownika
      */
     public String getPassword() {
         return password;
     }
 
     /**
-     * Sets the password of the user.
+     * Ustawia hasło użytkownika.
      *
-     * @param password the password
+     * @param password hasło użytkownika
      */
     public void setPassword(String password) {
         this.password = password;
     }
 
     /**
-     * Gets the bio of the user.
+     * Pobiera biografię użytkownika.
      *
-     * @return the bio
+     * @return biografia użytkownika
      */
     public String getBio() {
         return bio;
     }
 
     /**
-     * Sets the bio of the user.
+     * Ustawia biografię użytkownika.
      *
-     * @param bio the bio
+     * @param bio biografia użytkownika
      */
     public void setBio(String bio) {
         this.bio = bio;
     }
 
     /**
-     * Gets the profile picture URL of the user.
+     * Pobiera URL zdjęcia profilowego użytkownika.
      *
-     * @return the profile picture URL
+     * @return URL zdjęcia profilowego użytkownika
      */
     public String getPicture() {
         return picture;
     }
 
     /**
-     * Sets the profile picture URL of the user.
+     * Ustawia URL zdjęcia profilowego użytkownika.
      *
-     * @param picture the profile picture URL
+     * @param picture URL zdjęcia profilowego użytkownika
      */
     public void setPicture(String picture) {
         this.picture = picture;
     }
 
+    /**
+     * Pobiera zestaw użytkowników, których ten użytkownik śledzi.
+     *
+     * @return zestaw użytkowników jako Set<Follow>
+     */
     public Set<Follow> getFollowing() {
         return following;
     }
 
+    /**
+     * Ustawia zestaw użytkowników, których ten użytkownik śledzi.
+     *
+     * @param following zestaw użytkowników jako Set<Follow>
+     */
     public void setFollowing(Set<Follow> following) {
         this.following = following;
     }
 
+    /**
+     * Pobiera zestaw użytkowników, którzy śledzą tego użytkownika.
+     *
+     * @return zestaw użytkowników jako Set<Follow>
+     */
     public Set<Follow> getFollowers() {
         return followers;
     }
 
+    /**
+     * Ustawia zestaw użytkowników, którzy śledzą tego użytkownika.
+     *
+     * @param followers zestaw użytkowników jako Set<Follow>
+     */
     public void setFollowers(Set<Follow> followers) {
         this.followers = followers;
     }
-
-
 }

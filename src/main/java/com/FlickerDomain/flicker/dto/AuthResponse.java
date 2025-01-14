@@ -1,3 +1,4 @@
+// AuthResponse.java
 package com.FlickerDomain.flicker.dto;
 
 /**
