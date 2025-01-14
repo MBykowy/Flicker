@@ -26,7 +26,7 @@ const MainPage = () => {
     const [isFollowing, setIsFollowing] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedTab, setSelectedTab] = useState("forYou");
-
+    const [userDetails, setUserDetails] = useState({});
     useEffect(() => {
         const savedTheme = localStorage.getItem("theme");
         const savedLanguage = localStorage.getItem("language");
@@ -200,10 +200,15 @@ const MainPage = () => {
         setLanguage((prevLanguage) => (prevLanguage === "en" ? "pl" : "en"));
     };
 
-    const handleUserClick = (user) => {
+    const handleUserClick = async (user) => {
         if (user.email !== email) {
             setSelectedUser(user);
             checkIfFollowing(user.email);
+            const response = await fetch(`/api/user/details?email=${user.email}`);
+            if (response.ok) {
+                const data = await response.json();
+                setUserDetails(data);
+            }
             setDialogOpen(true);
         }
     };
@@ -510,14 +515,16 @@ const MainPage = () => {
             <Dialog open={dialogOpen} onClose={handleCloseDialog}>
                 <DialogTitle>
                     <Box display="flex" alignItems="center">
-                        <Avatar src={selectedUser?.picture} alt={selectedUser?.username} />
+                        <Avatar src={userDetails.picture} alt={userDetails.username} />
                         <Typography variant="h6" style={{ marginLeft: '10px' }}>
-                            {selectedUser?.username}
+                            {userDetails.username}
                         </Typography>
                     </Box>
                 </DialogTitle>
                 <DialogContent>
-                    <Typography>{selectedUser?.bio}</Typography>
+                    <Typography>{userDetails.bio}</Typography>
+                    <Typography>Followers: {userDetails.followersCount}</Typography>
+                    <Typography>Following: {userDetails.followingCount}</Typography>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleFollowClick} color="primary">

@@ -11,7 +11,9 @@
     import org.springframework.security.crypto.password.PasswordEncoder;
     import org.springframework.stereotype.Service;
 
+    import java.util.HashMap;
     import java.util.List;
+    import java.util.Map;
     import java.util.Optional;
 
     /**
@@ -197,5 +199,18 @@
                 user.setBio(bio);
                 userRepository.save(user);
             }
+        }
+        public Map<String, Object> getUserDetails(String email) {
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            Map<String, Object> userDetails = new HashMap<>();
+            userDetails.put("username", user.getUsername());
+            userDetails.put("bio", user.getBio());
+            userDetails.put("picture", user.getPicture());
+            userDetails.put("followersCount", user.getFollowers().size());
+            userDetails.put("followingCount", user.getFollowing().size());
+
+            return userDetails;
         }
     }
