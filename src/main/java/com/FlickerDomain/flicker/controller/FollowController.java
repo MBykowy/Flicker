@@ -1,6 +1,9 @@
+// FollowController.java
 package com.FlickerDomain.flicker.controller;
 
+import com.FlickerDomain.flicker.dto.FollowerRequest;
 import com.FlickerDomain.flicker.service.FollowService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -8,21 +11,28 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/follow")
 public class FollowController {
 
-    private final FollowService followService;
+    @Autowired
+    private FollowService followService;
 
     public FollowController(FollowService followService) {
         this.followService = followService;
     }
 
     @PostMapping("/follow")
-    public ResponseEntity<String> followUser(@RequestParam String followerEmail, @RequestParam String followedEmail) {
-        followService.followUser(followerEmail, followedEmail);
+    public ResponseEntity<String> followUser(@RequestBody FollowerRequest followerRequest) {
+        followService.followUser(followerRequest.getFollowerEmail(), followerRequest.getFollowedEmail());
         return ResponseEntity.ok("Followed successfully");
     }
 
     @PostMapping("/unfollow")
-    public ResponseEntity<String> unfollowUser(@RequestParam String followerEmail, @RequestParam String followedEmail) {
-        followService.unfollowUser(followerEmail, followedEmail);
+    public ResponseEntity<String> unfollowUser(@RequestBody FollowerRequest followerRequest) {
+        followService.unfollowUser(followerRequest.getFollowerEmail(), followerRequest.getFollowedEmail());
         return ResponseEntity.ok("Unfollowed successfully");
+    }
+
+    @GetMapping("/check")
+    public boolean checkFollowStatus(@RequestParam("followerEmail") String followerEmail,
+                                     @RequestParam("followedEmail") String followedEmail) {
+        return followService.checkFollowStatus(followerEmail, followedEmail);
     }
 }

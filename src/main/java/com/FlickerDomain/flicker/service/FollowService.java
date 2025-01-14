@@ -42,4 +42,12 @@ public class FollowService {
 
         followRepository.deleteByFollowerAndFollowed(follower, followed);
     }
+    public boolean checkFollowStatus(String followerEmail, String followedEmail) {
+        User follower = userRepository.findByEmail(followerEmail)
+                .orElseThrow(() -> new RuntimeException("Follower not found"));
+        User followed = userRepository.findByEmail(followedEmail)
+                .orElseThrow(() -> new RuntimeException("Followed user not found"));
+
+        return followRepository.existsByFollowerAndFollowed(follower, followed);
+    }
 }
