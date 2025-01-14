@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/follow")
 public class FollowController {
@@ -19,20 +22,25 @@ public class FollowController {
     }
 
     @PostMapping("/follow")
-    public ResponseEntity<String> followUser(@RequestBody FollowerRequest followerRequest) {
+    public ResponseEntity<Map<String, String>> followUser(@RequestBody FollowerRequest followerRequest) {
         followService.followUser(followerRequest.getFollowerEmail(), followerRequest.getFollowedEmail());
-        return ResponseEntity.ok("Followed successfully");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Followed successfully");
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/unfollow")
-    public ResponseEntity<String> unfollowUser(@RequestBody FollowerRequest followerRequest) {
+    public ResponseEntity<Map<String, String>> unfollowUser(@RequestBody FollowerRequest followerRequest) {
         followService.unfollowUser(followerRequest.getFollowerEmail(), followerRequest.getFollowedEmail());
-        return ResponseEntity.ok("Unfollowed successfully");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Unfollowed successfully");
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/check")
-    public boolean checkFollowStatus(@RequestParam("followerEmail") String followerEmail,
-                                     @RequestParam("followedEmail") String followedEmail) {
-        return followService.checkFollowStatus(followerEmail, followedEmail);
+    public ResponseEntity<Boolean> checkFollowStatus(@RequestParam("followerEmail") String followerEmail,
+                                                     @RequestParam("followedEmail") String followedEmail) {
+        boolean isFollowing = followService.checkFollowStatus(followerEmail, followedEmail);
+        return ResponseEntity.ok(isFollowing);
     }
 }

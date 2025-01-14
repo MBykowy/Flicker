@@ -32,7 +32,6 @@ public class FollowService {
             followRepository.save(follow);
         }
     }
-
     @Transactional
     public void unfollowUser(String followerEmail, String followedEmail) {
         User follower = userRepository.findByEmail(followerEmail)
