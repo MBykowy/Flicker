@@ -112,11 +112,13 @@ public class AuthController {
      * @return a response entity indicating the result of the update
      */
     @PostMapping("/update-picture")
-    public ResponseEntity<?> updatePicture(@RequestParam String email, @RequestBody Map<String, String> request) {
+    public ResponseEntity<?> updatePicture(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
         String pictureUrl = request.get("picture");
         userService.updateUserPicture(email, pictureUrl);
         return ResponseEntity.ok(Collections.singletonMap("success", true));
     }
+
 
     /**
      * Logs out a user.

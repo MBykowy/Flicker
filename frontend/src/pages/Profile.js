@@ -78,19 +78,28 @@ const Profile = () => {
     }, []);
 
     const updatePicture = () => {
-        fetch("/auth/update-picture", {
+        fetch(`/auth/update-picture?email=${encodeURIComponent(user.email)}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: user.email, picture: newPictureUrl }),
+            body: JSON.stringify({ picture: newPictureUrl }),
         })
-            .then((response) => response.json())
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(() => {
                 setUser((prevUser) => ({ ...prevUser, picture: newPictureUrl }));
                 setNewPictureUrl("");
                 setIsEditingPicture(false);
             })
-            .catch(() => setError("Failed to update picture."));
+            .catch((error) => {
+                console.error("Error updating picture:", error);
+                setError("Failed to update picture.");
+            });
     };
+
 
     const updateBio = () => {
         fetch("/auth/update-bio", {
