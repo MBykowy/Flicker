@@ -1,5 +1,6 @@
 package com.FlickerDomain.flicker.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,6 +13,7 @@ import java.util.Set;
  * This entity is mapped to a database table using JPA annotations.
  */
 @Entity  // This annotation is important!
+@JsonIgnoreProperties({"following", "followers"})
 public class User implements Serializable {
 
     @Id

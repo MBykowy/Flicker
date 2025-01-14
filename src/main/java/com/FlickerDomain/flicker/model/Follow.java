@@ -1,8 +1,10 @@
 package com.FlickerDomain.flicker.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 @Entity
+@JsonIgnoreProperties({"follower", "followed"})
 public class Follow {
 
     @Id

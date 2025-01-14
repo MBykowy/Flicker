@@ -56,7 +56,7 @@ const MainPage = () => {
 
     useEffect(() => {
         fetchPosts();
-    }, [filter]);
+    }, [filter, isFollowing]);
 
     useEffect(() => {
         const emailFromCookie = document.cookie.split("; ").find(row => row.startsWith("email="))?.split("=")[1];
@@ -73,12 +73,13 @@ const MainPage = () => {
             url = '/posts/sorted/date/desc';
         } else if (filter === 'oldest') {
             url = '/posts/sorted/date/asc';
+        } else if (filter === 'following') {
+            url = `/posts/following?email=${email}`;
         }
         const response = await fetch(url);
         const data = await response.json();
         setPosts(data);
     };
-
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
     };
@@ -233,6 +234,8 @@ const MainPage = () => {
 
         if (response.ok) {
             setIsFollowing(!isFollowing);
+        } else {
+            console.error("Failed to follow/unfollow user");
         }
     };
 
@@ -329,17 +332,17 @@ const MainPage = () => {
             </Typography>
 
             <Container maxWidth="sm">
+                <Tabs
+                    value={selectedTab}
+                    onChange={handleTabChange}
+                    indicatorColor="primary"
+                    textColor="primary"
+                    centered
+                >
+                    <Tab label="For You" value="forYou" />
+                    <Tab label="Following" value="following" />
+                </Tabs>
                 <Paper elevation={3} style={{ padding: '20px', width: '100%', marginBottom: '20px' }}>
-                    <Tabs
-                        value={selectedTab}
-                        onChange={handleTabChange}
-                        indicatorColor="primary"
-                        textColor="primary"
-                        centered
-                    >
-                        <Tab label="For You" value="forYou" />
-                        <Tab label="Following" value="following" />
-                    </Tabs>
                     <TextField
                         label={language === "en" ? "What's on your mind?" : "Co masz na myśli?"}
                         fullWidth
