@@ -277,7 +277,7 @@ const MainPage = () => {
                     zIndex: 10
                 }}
             >
-                Profile
+                {language === "en" ? "Profile" : "Profil"}
             </Button>
 
             <Button
@@ -291,7 +291,7 @@ const MainPage = () => {
                     zIndex: 10
                 }}
             >
-                Logout
+                {language === "en" ? "Logout" : "Wyloguj się"}
             </Button>
 
             <Button
@@ -305,7 +305,7 @@ const MainPage = () => {
                     zIndex: 10
                 }}
             >
-                Toggle {theme === "light" ? "Dark" : "Light"} Mode
+                {language === "en" ? "Toggle Dark/Light Mode" : "Zmień tryb Dark/Light"}
             </Button>
 
             <Button
@@ -319,7 +319,7 @@ const MainPage = () => {
                     zIndex: 10
                 }}
             >
-                {language === "en" ? "Change to Polish" : "Change to English"}
+                {language === "en" ? "Change to Polish" : "Zmień na Angielski"}
             </Button>
 
             <Typography
@@ -339,8 +339,8 @@ const MainPage = () => {
                     textColor="primary"
                     centered
                 >
-                    <Tab label="For You" value="forYou" />
-                    <Tab label="Following" value="following" />
+                    <Tab label={language === "en" ? "For You" : "Dla Ciebie"} value="forYou" />
+                    <Tab label={language === "en" ? "Following" : "Obserwowani"} value="following" />
                 </Tabs>
                 <Paper elevation={3} style={{ padding: '20px', width: '100%', marginBottom: '20px' }}>
                     <TextField
@@ -368,10 +368,18 @@ const MainPage = () => {
                 </Paper>
 
                 <Box display="flex" justifyContent="center" mb={2}>
-                    <Button onClick={() => setFilter('mostLikes')}>Najwięcej Like</Button>
-                    <Button onClick={() => setFilter('leastLikes')}>Najmniej Like</Button>
-                    <Button onClick={() => setFilter('newest')}>Najnowsze</Button>
-                    <Button onClick={() => setFilter('oldest')}>Najstarsze</Button>
+                    <Button onClick={() => setFilter('mostLikes')}>
+                        {language === "en" ? "Most Likes" : "Najwięcej Like"}
+                    </Button>
+                    <Button onClick={() => setFilter('leastLikes')}>
+                        {language === "en" ? "Least Likes" : "Najmniej Like"}
+                    </Button>
+                    <Button onClick={() => setFilter('newest')}>
+                        {language === "en" ? "Newest" : "Najnowsze"}
+                    </Button>
+                    <Button onClick={() => setFilter('oldest')}>
+                        {language === "en" ? "Oldest" : "Najstarsze"}
+                    </Button>
                 </Box>
 
                 {filteredPosts.map((post) => (
@@ -449,7 +457,7 @@ const MainPage = () => {
                                         onClick={() => handleToggleLikePost(post.id)}
                                         style={{ marginRight: '10px' }}
                                     >
-                                        {post.likedBy.includes(email) ? "Unlike" : "Like"}
+                                        {post.likedBy.includes(email) ? (language === "en" ? "Unlike" : "Nie lubię") : (language === "en" ? "Like" : "Lubię")}
                                     </Button>
                                     <Typography variant="body2">{post.likes} Likes</Typography>
                                 </Box>
@@ -513,6 +521,7 @@ const MainPage = () => {
                         )}
                     </Paper>
                 ))}
+
             </Container>
 
             <Dialog open={dialogOpen} onClose={handleCloseDialog}>
@@ -526,20 +535,21 @@ const MainPage = () => {
                 </DialogTitle>
                 <DialogContent>
                     <Typography>{userDetails.bio}</Typography>
-                    <Typography>Followers: {userDetails.followersCount}</Typography>
-                    <Typography>Following: {userDetails.followingCount}</Typography>
+                    <Typography>{language === "en" ? "Followers:" : "Obserwujący:"} {userDetails.followersCount}</Typography>
+                    <Typography>{language === "en" ? "Following:" : "Obserwujący:"} {userDetails.followingCount}</Typography>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleFollowClick} color="primary">
-                        {isFollowing ? "Unfollow" : "Follow"}
+                        {isFollowing ? (language === "en" ? "Unfollow" : "Przestań obserwować") : (language === "en" ? "Follow" : "Obserwuj")}
                     </Button>
                     <Button onClick={handleCloseDialog} color="secondary">
-                        Block
+                        {language === "en" ? "Block" : "Zablokuj"}
                     </Button>
                 </DialogActions>
             </Dialog>
         </Box>
     );
+
 };
 
 export default MainPage;

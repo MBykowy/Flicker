@@ -7,14 +7,16 @@ const resources = {
         translation: {
             welcome: "Welcome to the Main Page!",
             profile: "Profile Page",
-            toggleLanguage: "Switch to Polish",
+            logout: "Logout",
+
         }
     },
     pl: {
         translation: {
-            welcome: "Witaj na stronie głównej!",
+            welcome: "Witaj na Stronie Głównej!",
             profile: "Strona Profilu",
-            toggleLanguage: "Przełącz na angielski",
+            logout: "Wyloguj",
+
         }
     }
 };
