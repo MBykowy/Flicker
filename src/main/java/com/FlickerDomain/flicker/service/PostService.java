@@ -2,7 +2,6 @@ package com.FlickerDomain.flicker.service;
 
 import com.FlickerDomain.flicker.model.Comment;
 import com.FlickerDomain.flicker.model.Post;
-import com.FlickerDomain.flicker.model.Follow;
 import com.FlickerDomain.flicker.model.User;
 import com.FlickerDomain.flicker.repository.CommentRepository;
 import com.FlickerDomain.flicker.repository.PostRepository;
@@ -203,16 +202,6 @@ public class PostService {
         return postRepository.findAllByOrderByCreatedAtAsc();
     }
 
-    /**
-     * Pobiera posty od użytkowników, których dany użytkownik śledzi.
-     *
-     * @param email email użytkownika
-     * @return lista postów od śledzonych użytkowników
-     * @throws RuntimeException jeśli użytkownik nie istnieje
-     */
-    public List<Post> getPostsFromFollowing(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-        Set<User> followedUsers = user.getFollowing().stream().map(Follow::getFollowed).collect(Collectors.toSet());
-        return postRepository.findByUserIn(followedUsers);
-    }
+
+
 }

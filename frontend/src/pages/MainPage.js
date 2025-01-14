@@ -23,7 +23,7 @@ const MainPage = () => {
     const [filter, setFilter] = useState('mostLikes');
 
     const [selectedUser, setSelectedUser] = useState(null);
-    const [isFollowing, setIsFollowing] = useState(false);
+
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedTab, setSelectedTab] = useState("forYou");
     const [userDetails, setUserDetails] = useState({});
@@ -56,7 +56,7 @@ const MainPage = () => {
 
     useEffect(() => {
         fetchPosts();
-    }, [filter, isFollowing]);
+    }, [filter]);
 
     useEffect(() => {
         const emailFromCookie = document.cookie.split("; ").find(row => row.startsWith("email="))?.split("=")[1];
@@ -73,13 +73,16 @@ const MainPage = () => {
             url = '/posts/sorted/date/desc';
         } else if (filter === 'oldest') {
             url = '/posts/sorted/date/asc';
-        } else if (filter === 'following') {
-            url = `/posts/following?email=${email}`;
         }
         const response = await fetch(url);
-        const data = await response.json();
-        setPosts(data);
+        if (response.ok) {
+            const data = await response.json();
+            setPosts(data);
+        }
     };
+    const filteredPosts = posts.filter(post => {
+        return true;
+    });
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
     };
@@ -204,38 +207,12 @@ const MainPage = () => {
     const handleUserClick = async (user) => {
         if (user.email !== email) {
             setSelectedUser(user);
-            checkIfFollowing(user.email);
             const response = await fetch(`/api/user/details?email=${user.email}`);
             if (response.ok) {
                 const data = await response.json();
                 setUserDetails(data);
             }
             setDialogOpen(true);
-        }
-    };
-
-    const checkIfFollowing = async (followedEmail) => {
-        const response = await fetch(`/api/follow/check?followerEmail=${email}&followedEmail=${followedEmail}`);
-        if (response.ok) {
-            const isFollowing = await response.json();
-            setIsFollowing(isFollowing);
-        }
-    };
-
-    const handleFollowClick = async () => {
-        const url = isFollowing ? "/api/follow/unfollow" : "/api/follow/follow";
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ followerEmail: email, followedEmail: selectedUser.email }),
-        });
-
-        if (response.ok) {
-            setIsFollowing(!isFollowing);
-        } else {
-            console.error("Failed to follow/unfollow user");
         }
     };
 
@@ -248,9 +225,6 @@ const MainPage = () => {
         setSelectedTab(newValue);
     };
 
-    const filteredPosts = selectedTab === "following"
-        ? posts.filter(post => post.user.followedBy && post.user.followedBy.includes(email))
-        : posts;
 
     return (
         <Box
@@ -535,12 +509,10 @@ const MainPage = () => {
                 </DialogTitle>
                 <DialogContent>
                     <Typography>{userDetails.bio}</Typography>
-                    <Typography>{language === "en" ? "Followers:" : "Obserwujący:"} {userDetails.followersCount}</Typography>
-                    <Typography>{language === "en" ? "Following:" : "Obserwujący:"} {userDetails.followingCount}</Typography>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleFollowClick} color="primary">
-                        {isFollowing ? (language === "en" ? "Unfollow" : "Przestań obserwować") : (language === "en" ? "Follow" : "Obserwuj")}
+                    <Button color="primary">
+                        {(language === "en" ? "Follow" : "Obserwuj")}
                     </Button>
                     <Button onClick={handleCloseDialog} color="secondary">
                         {language === "en" ? "Block" : "Zablokuj"}

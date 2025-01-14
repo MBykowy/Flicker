@@ -221,8 +221,7 @@ public class UserService {
         userDetails.put("username", user.getUsername());
         userDetails.put("bio", user.getBio());
         userDetails.put("picture", user.getPicture());
-        userDetails.put("followersCount", user.getFollowers().size());
-        userDetails.put("followingCount", user.getFollowing().size());
+
 
         return userDetails;
     }

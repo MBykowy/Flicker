@@ -14,7 +14,6 @@ import java.util.Set;
  * Ta encja jest mapowana na tabelę w bazie danych za pomocą adnotacji JPA.
  */
 @Entity  // Adnotacja wskazująca, że klasa jest encją JPA
-@JsonIgnoreProperties({"following", "followers"})  // Ignoruje pola following i followers przy serializacji JSON
 public class User implements Serializable {
 
     @Id
@@ -27,13 +26,6 @@ public class User implements Serializable {
     private String bio;
     private String picture;
 
-    // Relacja jeden do wielu (One-to-Many) - użytkownik śledzi innych użytkowników
-    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Follow> following;
-
-    // Relacja jeden do wielu (One-to-Many) - inni użytkownicy śledzą tego użytkownika
-    @OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Follow> followers;
 
     /**
      * Pobiera unikalny identyfikator użytkownika.
@@ -148,34 +140,5 @@ public class User implements Serializable {
      *
      * @return zestaw użytkowników jako Set<Follow>
      */
-    public Set<Follow> getFollowing() {
-        return following;
-    }
 
-    /**
-     * Ustawia zestaw użytkowników, których ten użytkownik śledzi.
-     *
-     * @param following zestaw użytkowników jako Set<Follow>
-     */
-    public void setFollowing(Set<Follow> following) {
-        this.following = following;
-    }
-
-    /**
-     * Pobiera zestaw użytkowników, którzy śledzą tego użytkownika.
-     *
-     * @return zestaw użytkowników jako Set<Follow>
-     */
-    public Set<Follow> getFollowers() {
-        return followers;
-    }
-
-    /**
-     * Ustawia zestaw użytkowników, którzy śledzą tego użytkownika.
-     *
-     * @param followers zestaw użytkowników jako Set<Follow>
-     */
-    public void setFollowers(Set<Follow> followers) {
-        this.followers = followers;
-    }
 }

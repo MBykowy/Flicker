@@ -179,15 +179,5 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
 
-    /**
-     * Pobiera posty od osób, które użytkownik śledzi.
-     *
-     * @param email email użytkownika
-     * @return lista postów od osób, które użytkownik śledzi
-     */
-    @GetMapping("/following")
-    public ResponseEntity<List<Post>> getPostsFromFollowing(@RequestParam String email) {
-        List<Post> posts = postService.getPostsFromFollowing(email);
-        return ResponseEntity.ok(posts);
-    }
+
 }
