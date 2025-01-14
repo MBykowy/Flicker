@@ -33,6 +33,12 @@ const Profile = () => {
     const [newUsername, setNewUsername] = useState("");
     const [theme, setTheme] = useState("light");
 
+    // Funkcja do odczytania emaila z cookies
+    const getEmailFromCookies = () => {
+        const cookies = document.cookie.split("; ");
+        const emailCookie = cookies.find((cookie) => cookie.startsWith("email="));
+        return emailCookie ? decodeURIComponent(emailCookie.split("=")[1]) : null;
+    };
 
     useEffect(() => {
         // Pobierz zapisany motyw z localStorage
@@ -51,12 +57,6 @@ const Profile = () => {
     }, [theme]);
 
     useEffect(() => {
-        const getEmailFromCookies = () => {
-            const cookies = document.cookie.split("; ");
-            const emailCookie = cookies.find((cookie) => cookie.startsWith("email="));
-            return emailCookie ? decodeURIComponent(emailCookie.split("=")[1]) : null;
-        };
-
         const email = getEmailFromCookies();
 
         if (!email) {
@@ -78,10 +78,23 @@ const Profile = () => {
     }, []);
 
     const updatePicture = () => {
-        fetch(`/auth/update-picture?email=${encodeURIComponent(user.email)}`, {
+        const email = getEmailFromCookies();
+
+        if (!email) {
+            console.error("Email not found in cookies.");
+            setError("Email not found.");
+            return;
+        }
+
+        fetch(`/auth/update-picture`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ picture: newPictureUrl }),
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                email: email,
+                picture: newPictureUrl
+            }),
         })
             .then((response) => {
                 if (!response.ok) {
@@ -99,7 +112,6 @@ const Profile = () => {
                 setError("Failed to update picture.");
             });
     };
-
 
     const updateBio = () => {
         fetch("/auth/update-bio", {
@@ -130,6 +142,7 @@ const Profile = () => {
             })
             .catch(() => setError("Failed to update username."));
     };
+    
 
     if (loading) return (
         <Container maxWidth="sm">
