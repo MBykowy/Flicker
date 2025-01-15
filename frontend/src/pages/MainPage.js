@@ -23,7 +23,7 @@ const MainPage = () => {
     const [filter, setFilter] = useState('mostLikes');
 
     const [selectedUser, setSelectedUser] = useState(null);
-    const [isFollowing, setIsFollowing] = useState(false);
+        const [isFollowing, setIsFollowing] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedTab, setSelectedTab] = useState("forYou");
     const [userDetails, setUserDetails] = useState({});
@@ -54,14 +54,15 @@ const MainPage = () => {
         localStorage.setItem("language", language);
     }, [language]);
 
-    useEffect(() => {
-        fetchPosts();
-    }, [filter, isFollowing]);
 
     useEffect(() => {
         const emailFromCookie = document.cookie.split("; ").find(row => row.startsWith("email="))?.split("=")[1];
         setEmail(emailFromCookie);
     }, []);
+
+    useEffect(() => {
+        fetchPosts();
+    }, [filter, isFollowing]);
 
     const fetchPosts = async () => {
         let url = '/posts';
@@ -80,6 +81,7 @@ const MainPage = () => {
         const data = await response.json();
         setPosts(data);
     };
+
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
     };
@@ -204,7 +206,7 @@ const MainPage = () => {
     const handleUserClick = async (user) => {
         if (user.email !== email) {
             setSelectedUser(user);
-            checkIfFollowing(user.email);
+            await checkIfFollowing(user.email);
             const response = await fetch(`/api/user/details?email=${user.email}`);
             if (response.ok) {
                 const data = await response.json();
@@ -246,11 +248,25 @@ const MainPage = () => {
 
     const handleTabChange = (event, newValue) => {
         setSelectedTab(newValue);
+        if (newValue === 'following') {
+            setFilter('following');
+        } else {
+            setFilter('mostLikes'); // Default filter for other tabs
+        }
     };
 
-    const filteredPosts = selectedTab === "following"
-        ? posts.filter(post => post.user.followedBy && post.user.followedBy.includes(email))
-        : posts;
+// Determine the filtered posts based on the selected tab (works)
+    let filteredPosts;
+    if (selectedTab === "following") {
+        filteredPosts = posts.filter(post => {
+            console.log("post.user:", post.user);
+            console.log("post.user.followedBy:", post.user?.followedBy);
+            console.log("email:", email);
+            return post.user && post.user.followedBy && post.user.followedBy.includes(email);
+        });
+    } else {
+        filteredPosts = posts;
+    }
 
     return (
         <Box
