@@ -21,6 +21,8 @@ const MainPage = () => {
     const [theme, setTheme] = useState("light");
     const [language, setLanguage] = useState("en");
     const [filter, setFilter] = useState('mostLikes');
+    const [blockedUsers, setBlockedUsers] = useState([]); // State for blocked users
+
 
     const [selectedUser, setSelectedUser] = useState(null);
         const [isFollowing, setIsFollowing] = useState(false);
@@ -49,6 +51,12 @@ const MainPage = () => {
         document.body.style.color = theme === "light" ? "#000" : "#fff";
         localStorage.setItem("theme", theme);
     }, [theme]);
+
+
+    useEffect(() => {
+        fetchBlockedUsers();
+    }, []);
+
 
     useEffect(() => {
         localStorage.setItem("language", language);
@@ -216,26 +224,53 @@ const MainPage = () => {
     };
 
     const handleBlockUser = async (blockedEmail) => {
-        const emailFromCookie = document.cookie.split("; ").find(row => row.startsWith("email="))?.split("=")[1];
-        const blockerEmail = emailFromCookie;
-        if (!blockerEmail) {
+        const emailFromCookie = document.cookie
+            .split("; ")
+            .find(row => row.startsWith("email="))
+            ?.split("=")[1];
+
+        if (!emailFromCookie) {
             console.error("Failed to retrieve blocker email from cookies");
             return;
         }
 
-        const response = await fetch("/posts/block", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ blockerEmail, blockedEmail }),
-        });
+        try {
+            const response = await fetch("/posts/block", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    blockerEmail: emailFromCookie,
+                    blockedEmail
+                }),
+            });
 
-        if (response.ok) {
-            // Optionally, update the UI to reflect the blocked user
-            await fetchPosts();
-        } else {
-            console.error("Failed to block user");
+            if (response.ok) {
+                await fetchBlockedUsers();
+                await fetchPosts(); // Refresh posts to remove blocked user's content
+                // Optionally show success message
+                alert("User blocked successfully");
+            } else {
+                throw new Error("Failed to block user");
+            }
+        } catch (error) {
+            console.error("Error blocking user:", error);
+            alert("Failed to block user. Please try again.");
+        }
+    };
+    const fetchBlockedUsers = async () => {
+        const emailFromCookie = document.cookie.split("; ").find(row => row.startsWith("email="))?.split("=")[1];
+        if (!emailFromCookie) return;
+
+        try {
+            const response = await fetch(`/posts/blocked?email=${emailFromCookie}`);
+            if (response.ok) {
+                const blocked = await response.json();
+                setBlockedUsers(blocked);
+            }
+        } catch (error) {
+            console.error("Failed to fetch blocked users:", error);
         }
     };
 
@@ -279,18 +314,18 @@ const MainPage = () => {
     };
 
 // Determine the filtered posts based on the selected tab (works)
+
     let filteredPosts;
     if (selectedTab === "following") {
         filteredPosts = posts.filter(post => {
-            console.log("post.user:", post.user);
-            console.log("post.user.followedBy:", post.user?.followedBy);
-            console.log("email:", email);
-            return post.user && post.user.followedBy && post.user.followedBy.includes(email);
+            const isBlocked = blockedUsers.includes(post.user?.email);
+            return post.user?.followedBy?.includes(email) && !isBlocked;
         });
     } else {
-        filteredPosts = posts;
+        filteredPosts = posts.filter(post => {
+            return !blockedUsers.includes(post.user?.email);
+        });
     }
-
     return (
         <Box
             display="flex"

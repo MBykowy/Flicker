@@ -6,11 +6,14 @@ import com.FlickerDomain.flicker.model.Post;
 import com.FlickerDomain.flicker.service.FileStorageService;
 import com.FlickerDomain.flicker.service.PostService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.FlickerDomain.flicker.service.BlockService;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Klasa PostController obsługuje żądania HTTP związane z postami, w tym ich tworzenie,
@@ -47,7 +50,14 @@ public class PostController {
         Post post = postService.createPost(postRequest.getEmail(), postRequest.getContent(), postRequest.getMediaUrl());
         return ResponseEntity.ok(post);
     }
-
+    private String getCurrentUserEmail() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails) {
+            return ((UserDetails) principal).getUsername();
+        } else {
+            return principal.toString();
+        }
+    }
     /**
      * Pobiera wszystkie posty.
      *
@@ -55,7 +65,7 @@ public class PostController {
      */
     @GetMapping
     public ResponseEntity<List<Post>> getAllPosts() {
-        List<Post> posts = postService.getAllPosts();
+        List<Post> posts = postService.getAllPosts(getCurrentUserEmail());
         return ResponseEntity.ok(posts);
     }
 
@@ -194,19 +204,31 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
 
-    @PostMapping("/block")
-    public ResponseEntity<Void> blockUser(@RequestBody Map<String, String> request) {
-        String blockerEmail = request.get("blockerEmail");
-        String blockedEmail = request.get("blockedEmail");
-        blockService.blockUser(blockerEmail, blockedEmail);
-        return ResponseEntity.noContent().build();
-    }
 
     @PostMapping("/unblock")
     public ResponseEntity<Void> unblockUser(@RequestParam String blockerEmail, @RequestParam String blockedEmail) {
         blockService.unblockUser(blockerEmail, blockedEmail);
         return ResponseEntity.noContent().build();
     }
+    @PostMapping("/block")
+    public ResponseEntity<?> blockUser(@RequestBody BlockUserRequest request) {
+        try {
+            blockService.blockUser(request.getBlockerEmail(), request.getBlockedEmail());
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
-
+    @GetMapping("/blocked")
+    public ResponseEntity<List<String>> getBlockedUsers(@RequestParam String email) {
+        List<String> blockedEmails = blockService.getBlockedUsers(email).stream()
+                .map(block -> block.getBlocked().getEmail())
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(blockedEmails);
+    }
 }
+
+
+
+

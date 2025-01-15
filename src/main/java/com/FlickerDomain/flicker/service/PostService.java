@@ -83,17 +83,26 @@ public class PostService {
      *
      * @return lista postów jako List<Post>
      */
-    public List<Post> getAllPosts() {
-        // Assuming the email of the current user is available in the security context or session
-        String email = getCurrentUserEmail();
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-        Set<User> blockedUsers = blockRepository.findByBlocker(user).stream()
+    public List<Post> getAllPosts(String email) {
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Get blocked users
+        Set<User> blockedUsers = blockRepository.findByBlocker(currentUser).stream()
                 .map(Block::getBlocked)
                 .collect(Collectors.toSet());
+
+        // Get users who blocked current user
+        Set<User> blockedByUsers = blockRepository.findByBlocked(currentUser).stream()
+                .map(Block::getBlocker)
+                .collect(Collectors.toSet());
+
         return postRepository.findAll().stream()
                 .filter(post -> !blockedUsers.contains(post.getUser()))
+                .filter(post -> !blockedByUsers.contains(post.getUser()))
                 .collect(Collectors.toList());
     }
+
 
     // Helper method to get the current user's email
     private String getCurrentUserEmail() {
@@ -234,23 +243,40 @@ public class PostService {
      * @return lista postów od śledzonych użytkowników
      * @throws RuntimeException jeśli użytkownik nie istnieje
      */
+// PostService.java
     public List<Post> getPostsFromFollowing(String email) {
         logger.info("Fetching posts from following for user: " + email);
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-        Set<User> followedUsers = user.getFollowing().stream().map(Follow::getFollowed).collect(Collectors.toSet());
-        List<Post> posts = postRepository.findByUserIn(followedUsers);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Ensure followedBy is populated
+        // Get blocked users
+        Set<User> blockedUsers = blockRepository.findByBlocker(user).stream()
+                .map(Block::getBlocked)
+                .collect(Collectors.toSet());
+
+        // Get users who blocked current user
+        Set<User> blockedByUsers = blockRepository.findByBlocked(user).stream()
+                .map(Block::getBlocker)
+                .collect(Collectors.toSet());
+
+        Set<User> followedUsers = user.getFollowing().stream()
+                .map(Follow::getFollowed)
+                .collect(Collectors.toSet());
+
+        // Filter out posts from blocked users and users who blocked current user
+        List<Post> posts = postRepository.findByUserIn(followedUsers).stream()
+                .filter(post -> !blockedUsers.contains(post.getUser()))
+                .filter(post -> !blockedByUsers.contains(post.getUser()))
+                .collect(Collectors.toList());
+
+        // Populate followedBy
         posts.forEach(post -> {
             User postUser = post.getUser();
-            logger.info("Post User: " + postUser);
             List<Follow> follows = followRepository.findByFollowed(postUser);
-            logger.info("Follows: " + follows);
             List<String> followedByEmails = follows.stream()
                     .map(follow -> follow.getFollower().getEmail())
                     .collect(Collectors.toList());
             postUser.setFollowedBy(followedByEmails);
-            logger.info("Post User FollowedBy: " + postUser.getFollowedBy());
         });
 
         return posts;
