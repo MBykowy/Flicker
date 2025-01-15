@@ -508,7 +508,12 @@ const MainPage = () => {
                                     <Box mt={2}>
                                         {comments[post.id].map(comment => (
                                             <Paper key={comment.id} style={{ padding: '10px', marginBottom: '10px' }}>
-                                                <Typography variant="body2">{comment.content}</Typography>
+                                                <Typography variant="body2">
+                                                    <strong>{comment.user.username}</strong>
+                                                </Typography>
+                                                <Typography variant="body2">
+                                                    {comment.content}
+                                                </Typography>
                                                 <Typography variant="caption" color="textSecondary">
                                                     {new Date(comment.createdAt).toLocaleString()}
                                                 </Typography>

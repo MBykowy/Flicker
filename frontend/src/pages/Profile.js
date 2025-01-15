@@ -22,7 +22,7 @@ import {
 import { Link } from "react-router-dom";
 
 const Profile = () => {
-    const [user, setUser] = useState({ username: "", email: "", bio: "", picture: "" });
+    const [user, setUser] = useState({ username: "", email: "", bio: "", picture: "", followersCount: 0, followingCount: 0 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isEditingPicture, setIsEditingPicture] = useState(false);
@@ -33,7 +33,6 @@ const Profile = () => {
     const [newUsername, setNewUsername] = useState("");
     const [theme, setTheme] = useState("light");
 
-    // Funkcja do odczytania emaila z cookies
     const getEmailFromCookies = () => {
         const cookies = document.cookie.split("; ");
         const emailCookie = cookies.find((cookie) => cookie.startsWith("email="));
@@ -41,12 +40,10 @@ const Profile = () => {
     };
 
     useEffect(() => {
-        // Pobierz zapisany motyw z localStorage
         const savedTheme = localStorage.getItem("theme");
         if (savedTheme) {
             setTheme(savedTheme);
         } else {
-            // Jeśli nie ma zapisanej wartości, ustaw domyślnie na "light"
             setTheme("light");
         }
     }, []);
@@ -65,7 +62,7 @@ const Profile = () => {
             return;
         }
 
-        fetch(`/auth/user-details?email=${email}`)
+        fetch(`/api/user/details?email=${email}`)
             .then((response) => response.json())
             .then((data) => {
                 setUser(data);
@@ -114,10 +111,18 @@ const Profile = () => {
     };
 
     const updateBio = () => {
+        const email = getEmailFromCookies();
+
+        if (!email) {
+            console.error("Email not found in cookies.");
+            setError("Email not found.");
+            return;
+        }
+
         fetch("/auth/update-bio", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: user.email, bio: newBio }),
+            body: JSON.stringify({ email: email, bio: newBio }),
         })
             .then((response) => response.json())
             .then(() => {
@@ -129,10 +134,18 @@ const Profile = () => {
     };
 
     const updateUsername = () => {
+        const email = getEmailFromCookies();
+
+        if (!email) {
+            console.error("Email not found in cookies.");
+            setError("Email not found.");
+            return;
+        }
+
         fetch("/auth/update-username", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: user.email, username: newUsername }),
+            body: JSON.stringify({ email: email, username: newUsername }),
         })
             .then((response) => response.json())
             .then(() => {
@@ -142,7 +155,6 @@ const Profile = () => {
             })
             .catch(() => setError("Failed to update username."));
     };
-
 
     if (loading) return (
         <Container maxWidth="sm">
@@ -164,7 +176,6 @@ const Profile = () => {
         <Container maxWidth="sm">
             <Paper elevation={3} sx={{ p: 4, mt: 4, borderRadius: 2 }}>
                 <Grid container spacing={3} alignItems="center" direction="column">
-                    {/* Profile Picture */}
                     <Grid item>
                         <Box position="relative">
                             <Avatar
@@ -192,7 +203,6 @@ const Profile = () => {
                         </Box>
                     </Grid>
 
-                    {/* Username */}
                     <Grid item container justifyContent="center" alignItems="center" spacing={1}>
                         <Grid item>
                             <Typography variant="h5" color="text.primary">
@@ -210,14 +220,12 @@ const Profile = () => {
                         </Grid>
                     </Grid>
 
-                    {/* Email */}
                     <Grid item>
                         <Typography variant="body1" color="text.secondary">
                             {user.email}
                         </Typography>
                     </Grid>
 
-                    {/* Bio */}
                     <Grid item container justifyContent="center" alignItems="center" spacing={1}>
                         <Grid item>
                             <Typography variant="body1" color="text.secondary" align="center">
@@ -235,7 +243,18 @@ const Profile = () => {
                         </Grid>
                     </Grid>
 
-                    {/* Dialogs for Editing */}
+                    <Grid item>
+                        <Typography variant="body1" color="text.secondary">
+                            Followers: {user.followersCount}
+                        </Typography>
+                    </Grid>
+
+                    <Grid item>
+                        <Typography variant="body1" color="text.secondary">
+                            Following: {user.followingCount}
+                        </Typography>
+                    </Grid>
+
                     <Dialog
                         open={isEditingPicture}
                         onClose={() => setIsEditingPicture(false)}
@@ -346,7 +365,6 @@ const Profile = () => {
                         </DialogActions>
                     </Dialog>
 
-                    {/* Edit Profile Link */}
                     <Grid item>
                         <Link to="/" style={{ textDecoration: 'none' }}>
                             <Button
