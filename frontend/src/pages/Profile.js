@@ -32,6 +32,7 @@ const Profile = () => {
     const [isEditingUsername, setIsEditingUsername] = useState(false);
     const [newUsername, setNewUsername] = useState("");
     const [theme, setTheme] = useState("light");
+    const [bannedUsers, setBannedUsers] = useState([]); // State for banned users
 
     const getEmailFromCookies = () => {
         const cookies = document.cookie.split("; ");
@@ -74,6 +75,74 @@ const Profile = () => {
             });
     }, []);
 
+    useEffect(() => {
+        const email = getEmailFromCookies();
+
+        if (!email) {
+            setError("Email not found in cookies.");
+            setLoading(false);
+            return;
+        }
+
+        fetch(`/api/user/details?email=${email}`)
+            .then((response) => response.json())
+            .then((data) => {
+                setUser(data);
+                setLoading(false);
+            })
+            .catch((err) => {
+                setError("Failed to load user details.");
+                setLoading(false);
+            });
+
+        fetchBannedUsers(email); // Fetch banned users
+    }, []);
+
+    const fetchBannedUsers = async (email) => {
+        try {
+            const response = await fetch(`/posts/blocked?email=${email}`);
+            if (response.ok) {
+                const data = await response.json();
+                setBannedUsers(data);
+            } else {
+                throw new Error("Failed to fetch banned users");
+            }
+        } catch (error) {
+            console.error("Error fetching banned users:", error);
+        }
+    };
+
+    const unbanUser = async (blockedEmail) => {
+        const email = getEmailFromCookies();
+
+        if (!email) {
+            console.error("Email not found in cookies.");
+            setError("Email not found.");
+            return;
+        }
+
+        console.log(`Attempting to unban user: ${blockedEmail} by ${email}`);
+
+        try {
+            const response = await fetch(`/posts/unblock?blockerEmail=${encodeURIComponent(email)}&blockedEmail=${encodeURIComponent(blockedEmail)}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (response.ok) {
+                console.log(`Successfully unbanned user: ${blockedEmail}`);
+                setBannedUsers(bannedUsers.filter(user => user !== blockedEmail));
+            } else {
+                const errorText = await response.text();
+                console.error(`Failed to unban user: ${blockedEmail}. Server responded with: ${errorText}`);
+                throw new Error("Failed to unban user");
+            }
+        } catch (error) {
+            console.error("Error unbanning user:", error);
+        }
+    };
     const updatePicture = () => {
         const email = getEmailFromCookies();
 
@@ -253,6 +322,24 @@ const Profile = () => {
                         <Typography variant="body1" color="text.secondary">
                             Following: {user.followingCount}
                         </Typography>
+                    </Grid>
+
+                    <Grid item>
+                        <Typography variant="h6">Banned Users</Typography>
+                        {bannedUsers.length > 0 ? (
+                            <Box>
+                                {bannedUsers.map((user) => (
+                                    <Box key={user} display="flex" alignItems="center" justifyContent="space-between" mb={1}>
+                                        <Typography>{user}</Typography>
+                                        <Button variant="contained" color="secondary" onClick={() => unbanUser(user)}>
+                                            Unban
+                                        </Button>
+                                    </Box>
+                                ))}
+                            </Box>
+                        ) : (
+                            <Typography>No banned users</Typography>
+                        )}
                     </Grid>
 
                     <Dialog
