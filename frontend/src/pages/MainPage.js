@@ -81,7 +81,6 @@ const MainPage = () => {
         const data = await response.json();
         setPosts(data);
     };
-
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
     };
@@ -213,6 +212,30 @@ const MainPage = () => {
                 setUserDetails(data);
             }
             setDialogOpen(true);
+        }
+    };
+
+    const handleBlockUser = async (blockedEmail) => {
+        const emailFromCookie = document.cookie.split("; ").find(row => row.startsWith("email="))?.split("=")[1];
+        const blockerEmail = emailFromCookie;
+        if (!blockerEmail) {
+            console.error("Failed to retrieve blocker email from cookies");
+            return;
+        }
+
+        const response = await fetch("/posts/block", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ blockerEmail, blockedEmail }),
+        });
+
+        if (response.ok) {
+            // Optionally, update the UI to reflect the blocked user
+            await fetchPosts();
+        } else {
+            console.error("Failed to block user");
         }
     };
 
@@ -558,9 +581,10 @@ const MainPage = () => {
                     <Button onClick={handleFollowClick} color="primary">
                         {isFollowing ? (language === "en" ? "Unfollow" : "Przestań obserwować") : (language === "en" ? "Follow" : "Obserwuj")}
                     </Button>
-                    <Button onClick={handleCloseDialog} color="secondary">
+                    <Button onClick={() => handleBlockUser(selectedUser.email)} color="secondary">
                         {language === "en" ? "Block" : "Zablokuj"}
                     </Button>
+
                 </DialogActions>
             </Dialog>
         </Box>

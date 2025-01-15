@@ -1,0 +1,45 @@
+### High-Level Plan for Implementing Blocking Functionality
+
+1. **Database Changes**:
+   - Add a new entity `Block` to represent the blocking relationship between users.
+   - Update the `User` entity to include relationships for blocked users and users who have blocked them.
+
+2. **Backend Changes**:
+   - Create a `BlockRepository` to handle CRUD operations for the `Block` entity.
+   - Implement a `BlockService` to manage the business logic for blocking and unblocking users.
+   - Update the `PostService` and other relevant services to filter out posts and interactions from blocked users.
+   - Update the `PostController` and other relevant controllers to include endpoints for blocking and unblocking users.
+
+3. **Frontend Changes**:
+   - Modify the `MainPage.js` to include functionality for blocking users using the existing button.
+   - Ensure that blocked users are hidden from the user's view in the UI.
+
+### Step-by-Step Implementation
+
+#### 1. Database Changes
+
+**Block Entity**:
+- Create a new `Block` entity to store blocking relationships between users.
+- Update the `User` entity to include sets of blocked users and users who have blocked them.
+
+#### 2. Backend Changes
+
+**BlockRepository**:
+- Create a repository to handle CRUD operations for the `Block` entity.
+
+**BlockService**:
+- Implement methods to block and unblock users.
+- Ensure that blocked users are filtered out in relevant service methods.
+
+**PostService**:
+- Update methods to filter out posts from blocked users.
+
+**PostController**:
+- Add endpoints for blocking and unblocking users.
+
+#### 3. Frontend Changes
+
+**MainPage.js**:
+- Implement a function to call the backend endpoint to block users.
+- Update the `fetchPosts` function to filter out posts from blocked users.
+- Use the existing button to trigger the blocking functionality.

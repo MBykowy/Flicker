@@ -8,8 +8,9 @@ import com.FlickerDomain.flicker.service.PostService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import com.FlickerDomain.flicker.service.BlockService;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Klasa PostController obsługuje żądania HTTP związane z postami, w tym ich tworzenie,
@@ -21,6 +22,7 @@ public class PostController {
 
     private final PostService postService;
     private final FileStorageService fileStorageService;
+    private final BlockService blockService;
 
     /**
      * Tworzy obiekt PostController z podanym PostService i FileStorageService.
@@ -28,9 +30,10 @@ public class PostController {
      * @param postService        serwis obsługujący operacje na postach
      * @param fileStorageService serwis obsługujący przechowywanie plików
      */
-    public PostController(PostService postService, FileStorageService fileStorageService) {
+    public PostController(PostService postService, FileStorageService fileStorageService, BlockService blockService) {
         this.postService = postService;
         this.fileStorageService = fileStorageService;
+        this.blockService = blockService;
     }
 
     /**
@@ -190,4 +193,20 @@ public class PostController {
         List<Post> posts = postService.getPostsFromFollowing(email);
         return ResponseEntity.ok(posts);
     }
+
+    @PostMapping("/block")
+    public ResponseEntity<Void> blockUser(@RequestBody Map<String, String> request) {
+        String blockerEmail = request.get("blockerEmail");
+        String blockedEmail = request.get("blockedEmail");
+        blockService.blockUser(blockerEmail, blockedEmail);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/unblock")
+    public ResponseEntity<Void> unblockUser(@RequestParam String blockerEmail, @RequestParam String blockedEmail) {
+        blockService.unblockUser(blockerEmail, blockedEmail);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }

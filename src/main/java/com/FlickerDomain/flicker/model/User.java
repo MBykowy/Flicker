@@ -18,6 +18,7 @@ import java.util.Set;
  * Ta encja jest mapowana na tabelę w bazie danych za pomocą adnotacji JPA.
  */
 @Entity  // Adnotacja wskazująca, że klasa jest encją JPA
+@JsonIgnoreProperties({"followers", "following", "blockedUsers", "blockedByUsers"})
 
 public class User implements Serializable {
 
@@ -32,10 +33,17 @@ public class User implements Serializable {
     private String picture;
 
     @OneToMany(mappedBy = "followed")
-    private Set<Follow> followers;
+    private Set<Follow> followers = new HashSet<>();
 
     @OneToMany(mappedBy = "follower")
-    private Set<Follow> following;
+    private Set<Follow> following = new HashSet<>();
+
+    @OneToMany(mappedBy = "blocker")
+    private Set<Block> blockedUsers = new HashSet<>();
+
+    @OneToMany(mappedBy = "blocked")
+    private Set<Block> blockedByUsers = new HashSet<>();
+
 
     @ElementCollection
     private List<String> followedBy = new ArrayList<>();
@@ -170,10 +178,19 @@ public class User implements Serializable {
         this.picture = picture;
     }
 
-    /**
-     * Pobiera zestaw użytkowników, których ten użytkownik śledzi.
-     *
-     * @return zestaw użytkowników jako Set<Follow>
-     */
+    public Set<Block> getBlockedUsers() {
+        return blockedUsers;
+    }
 
+    public void setBlockedUsers(Set<Block> blockedUsers) {
+        this.blockedUsers = blockedUsers;
+    }
+
+    public Set<Block> getBlockedByUsers() {
+        return blockedByUsers;
+    }
+
+    public void setBlockedByUsers(Set<Block> blockedByUsers) {
+        this.blockedByUsers = blockedByUsers;
+    }
 }

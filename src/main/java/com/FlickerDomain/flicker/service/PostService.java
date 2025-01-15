@@ -10,12 +10,12 @@ import com.FlickerDomain.flicker.repository.PostRepository;
 import com.FlickerDomain.flicker.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+import com.FlickerDomain.flicker.repository.BlockRepository;
 import java.util.logging.Logger;
+import com.FlickerDomain.flicker.model.Block;
 
 /**
  * Klasa PostService dostarcza logikę biznesową dla operacji związanych z postami,
@@ -41,6 +41,7 @@ public class PostService {
      */
     private final CommentRepository commentRepository;
     private final FollowRepository followRepository;
+    private final BlockRepository blockRepository;
 
 
     /**
@@ -50,11 +51,12 @@ public class PostService {
      * @param userRepository   repozytorium użytkowników
      * @param commentRepository repozytorium komentarzy
      */
-    public PostService(PostRepository postRepository, UserRepository userRepository, CommentRepository commentRepository, FollowRepository followRepository) {
+    public PostService(PostRepository postRepository, UserRepository userRepository, CommentRepository commentRepository, FollowRepository followRepository, BlockRepository blockRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
         this.followRepository = followRepository;
+        this.blockRepository = blockRepository;
 
     }
 
@@ -82,9 +84,22 @@ public class PostService {
      * @return lista postów jako List<Post>
      */
     public List<Post> getAllPosts() {
-        return postRepository.findAll();
+        // Assuming the email of the current user is available in the security context or session
+        String email = getCurrentUserEmail();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        Set<User> blockedUsers = blockRepository.findByBlocker(user).stream()
+                .map(Block::getBlocked)
+                .collect(Collectors.toSet());
+        return postRepository.findAll().stream()
+                .filter(post -> !blockedUsers.contains(post.getUser()))
+                .collect(Collectors.toList());
     }
 
+    // Helper method to get the current user's email
+    private String getCurrentUserEmail() {
+        // Implement this method to retrieve the current user's email from the security context or session
+        return "current_user_email@example.com"; // Replace with actual implementation
+    }
     /**
      * Usuwa post i powiązane z nim komentarze.
      *
