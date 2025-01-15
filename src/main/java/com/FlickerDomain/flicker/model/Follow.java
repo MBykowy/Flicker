@@ -1,3 +1,4 @@
+// Follow.java
 package com.FlickerDomain.flicker.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -23,56 +24,27 @@ public class Follow {
     @JoinColumn(name = "followed_id", nullable = false)
     private User followed;
 
-    /**
-     * Pobiera ID relacji Follow.
-     *
-     * @return ID relacji Follow jako Long.
-     */
+    // Getters and setters
     public Long getId() {
         return id;
     }
 
-    /**
-     * Ustawia ID relacji Follow.
-     *
-     * @param id ID relacji Follow jako Long.
-     */
     public void setId(Long id) {
         this.id = id;
     }
 
-    /**
-     * Pobiera użytkownika, który obserwuje.
-     *
-     * @return obiekt User reprezentujący użytkownika, który obserwuje.
-     */
     public User getFollower() {
         return follower;
     }
 
-    /**
-     * Ustawia użytkownika, który obserwuje.
-     *
-     * @param follower obiekt User reprezentujący użytkownika, który obserwuje.
-     */
     public void setFollower(User follower) {
         this.follower = follower;
     }
 
-    /**
-     * Pobiera użytkownika, który jest obserwowany.
-     *
-     * @return obiekt User reprezentujący użytkownika, który jest obserwowany.
-     */
     public User getFollowed() {
         return followed;
     }
 
-    /**
-     * Ustawia użytkownika, który jest obserwowany.
-     *
-     * @param followed obiekt User reprezentujący użytkownika, który jest obserwowany.
-     */
     public void setFollowed(User followed) {
         this.followed = followed;
     }

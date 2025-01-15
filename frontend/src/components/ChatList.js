@@ -35,7 +35,7 @@ const ChatList = ({ onSelectConversation }) => {
                         <div>Participant: {conversation.otherParticipant}</div>
                         <div>Last Message: {conversation.lastMessage}</div>
                         <div>Content: {conversation.content}</div>
-                    </li>
+                    </li>   
                 ))}
             </ul>
         </div>

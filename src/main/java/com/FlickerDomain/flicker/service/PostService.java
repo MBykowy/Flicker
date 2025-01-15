@@ -5,6 +5,7 @@ import com.FlickerDomain.flicker.model.Post;
 import com.FlickerDomain.flicker.model.Follow;
 import com.FlickerDomain.flicker.model.User;
 import com.FlickerDomain.flicker.repository.CommentRepository;
+import com.FlickerDomain.flicker.repository.FollowRepository;
 import com.FlickerDomain.flicker.repository.PostRepository;
 import com.FlickerDomain.flicker.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -14,12 +15,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import java.util.logging.Logger;
+
 /**
  * Klasa PostService dostarcza logikę biznesową dla operacji związanych z postami,
  * w tym tworzenie, usuwanie, polubienia oraz zarządzanie komentarzami.
  */
 @Service
 public class PostService {
+    private static final Logger logger = Logger.getLogger(PostService.class.getName());
+
 
     /**
      * Repozytorium do zarządzania postami.
@@ -35,6 +40,8 @@ public class PostService {
      * Repozytorium do zarządzania komentarzami.
      */
     private final CommentRepository commentRepository;
+    private final FollowRepository followRepository;
+
 
     /**
      * Konstruktor klasy PostService.
@@ -43,10 +50,12 @@ public class PostService {
      * @param userRepository   repozytorium użytkowników
      * @param commentRepository repozytorium komentarzy
      */
-    public PostService(PostRepository postRepository, UserRepository userRepository, CommentRepository commentRepository) {
+    public PostService(PostRepository postRepository, UserRepository userRepository, CommentRepository commentRepository, FollowRepository followRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
+        this.followRepository = followRepository;
+
     }
 
     /**
@@ -211,8 +220,24 @@ public class PostService {
      * @throws RuntimeException jeśli użytkownik nie istnieje
      */
     public List<Post> getPostsFromFollowing(String email) {
+        logger.info("Fetching posts from following for user: " + email);
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         Set<User> followedUsers = user.getFollowing().stream().map(Follow::getFollowed).collect(Collectors.toSet());
-        return postRepository.findByUserIn(followedUsers);
+        List<Post> posts = postRepository.findByUserIn(followedUsers);
+
+        // Ensure followedBy is populated
+        posts.forEach(post -> {
+            User postUser = post.getUser();
+            logger.info("Post User: " + postUser);
+            List<Follow> follows = followRepository.findByFollowed(postUser);
+            logger.info("Follows: " + follows);
+            List<String> followedByEmails = follows.stream()
+                    .map(follow -> follow.getFollower().getEmail())
+                    .collect(Collectors.toList());
+            postUser.setFollowedBy(followedByEmails);
+            logger.info("Post User FollowedBy: " + postUser.getFollowedBy());
+        });
+
+        return posts;
     }
 }

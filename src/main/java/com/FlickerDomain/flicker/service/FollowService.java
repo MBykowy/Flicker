@@ -1,11 +1,17 @@
 package com.FlickerDomain.flicker.service;
 
 import com.FlickerDomain.flicker.model.Follow;
+import com.FlickerDomain.flicker.model.Post;
 import com.FlickerDomain.flicker.model.User;
 import com.FlickerDomain.flicker.repository.FollowRepository;
+import com.FlickerDomain.flicker.repository.PostRepository;
 import com.FlickerDomain.flicker.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Klasa {@link FollowService} obsługuje logikę biznesową związaną z obserwowaniem użytkowników.
@@ -28,6 +34,9 @@ public class FollowService {
      */
     private final UserRepository userRepository;
 
+    private final PostRepository postRepository;
+
+
     /**
      * Konstruktor klasy {@link FollowService}.
      * Inicjalizuje repozytoria niezbędne do zarządzania danymi użytkowników oraz relacjami "Follow".
@@ -35,9 +44,10 @@ public class FollowService {
      * @param followRepository repozytorium dla relacji "Follow".
      * @param userRepository repozytorium dla użytkowników.
      */
-    public FollowService(FollowRepository followRepository, UserRepository userRepository) {
+    public FollowService(FollowRepository followRepository, UserRepository userRepository, PostRepository postRepository) {
         this.followRepository = followRepository;
         this.userRepository = userRepository;
+        this.postRepository = postRepository;
     }
 
     /**
@@ -100,5 +110,22 @@ public class FollowService {
                 .orElseThrow(() -> new RuntimeException("Followed user not found"));
 
         return followRepository.existsByFollowerAndFollowed(follower, followed); // Sprawdzenie statusu relacji
+    }
+
+    // PostService.java
+    public List<Post> getPostsFromFollowing(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        Set<User> followedUsers = user.getFollowing().stream().map(Follow::getFollowed).collect(Collectors.toSet());
+        List<Post> posts = postRepository.findByUserIn(followedUsers);
+
+// Ensure followedBy is populated
+        posts.forEach(post -> {
+            User postUser = post.getUser();
+            postUser.setFollowedBy(followRepository.findByFollowed(postUser).stream()
+                    .map(follow -> follow.getFollower().getEmail())
+                    .collect(Collectors.toList()));
+        });
+
+        return posts;
     }
 }
