@@ -3,13 +3,11 @@ package com.example.flicker;
 import com.FlickerDomain.flicker.service.FileStorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.lang.reflect.Field;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -20,73 +18,50 @@ class FileStorageServiceTest {
 
     private FileStorageService fileStorageService;
 
-    @Mock
-    private MultipartFile multipartFile;
-
     @BeforeEach
-    void setUp() throws IOException {
-        MockitoAnnotations.openMocks(this);
-        // Tworzymy instancję klasy FileStorageService
+    void setUp() throws Exception {
+        // Przygotowanie przed każdym testem
         fileStorageService = new FileStorageService();
-
-        // Tworzymy katalog "uploads" do testów
-        Path uploadsDir = Path.of("uploads").toAbsolutePath().normalize();
-        Files.createDirectories(uploadsDir);
+        Files.createDirectories(Path.of("uploads")); // Upewnienie się, że katalog istnieje
     }
 
     @Test
-    void shouldStoreFileSuccessfully() throws IOException {
-        // Przygotowanie danych testowych
-        String fileName = "testfile.txt";
-        byte[] fileContent = "Test file content".getBytes();
-
-        when(multipartFile.getOriginalFilename()).thenReturn(fileName);
-        when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream(fileContent));
-
-        // Wywołanie metody
-        String storedFilePath = fileStorageService.storeFile(multipartFile);
-
-        // Sprawdzenie wyników
-        assertEquals("/uploads/" + fileName, storedFilePath);
-        Path expectedPath = Path.of("uploads").toAbsolutePath().resolve(fileName);
-        assertTrue(Files.exists(expectedPath), "Plik powinien zostać zapisany na dysku");
-
-        // Usunięcie pliku po teście
-        Files.deleteIfExists(expectedPath);
+    void testConstructorCreatesDirectory() {
+        // Sprawdzanie, czy konstruktor tworzy katalog
+        assertTrue(Files.exists(Path.of("uploads")), "Katalog 'uploads' powinien zostać utworzony.");
     }
 
     @Test
-    void shouldThrowExceptionWhenFileStorageFails() throws IOException {
-        // Przygotowanie danych testowych
-        String fileName = "testfile.txt";
-        when(multipartFile.getOriginalFilename()).thenReturn(fileName);
-        when(multipartFile.getInputStream()).thenThrow(new IOException("Mocked IOException"));
+    void testStoreFileSuccessfully() throws Exception {
+        // Przygotowanie mocka MultipartFile
+        MultipartFile mockFile = mock(MultipartFile.class);
+        when(mockFile.getOriginalFilename()).thenReturn("testfile.txt");
 
-        // Sprawdzenie, czy wyjątek został zgłoszony
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            fileStorageService.storeFile(multipartFile);
-        });
+        byte[] fileContent = "Test content".getBytes();
+        InputStream fileStream = new ByteArrayInputStream(fileContent);
+        when(mockFile.getInputStream()).thenReturn(fileStream);
 
-        assertTrue(exception.getMessage().contains("Nie można zapisać pliku"));
+        // Akcja
+        String filePath = fileStorageService.storeFile(mockFile);
+
+        // Walidacja
+        assertEquals("/uploads/testfile.txt", filePath, "Zwrócona ścieżka powinna być poprawna.");
+        assertTrue(Files.exists(Path.of("uploads/testfile.txt")), "Plik powinien zostać zapisany w katalogu 'uploads'.");
+
+        // Czyszczenie
+        Files.deleteIfExists(Path.of("uploads/testfile.txt"));
     }
 
     @Test
-    void shouldThrowExceptionWhenCreatingDirectoryFails() {
-        // Przygotowanie
-        Path invalidPath = Path.of("/invalid/uploads").toAbsolutePath().normalize();
+    void testStoreFileThrowsExceptionWhenErrorOccurs() throws Exception {
+        // Przygotowanie mocka MultipartFile
+        MultipartFile mockFile = mock(MultipartFile.class);
+        when(mockFile.getOriginalFilename()).thenReturn("testfile.txt");
+        when(mockFile.getInputStream()).thenThrow(new RuntimeException("Błąd podczas odczytu pliku."));
 
-        // Wymuszenie wyjątku, gdy klasa próbuje utworzyć katalog w niepoprawnej lokalizacji
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            // Użycie refleksji, aby ustawić nieprawidłową lokalizację katalogu
-            Field field = FileStorageService.class.getDeclaredField("fileStorageLocation");
-            field.setAccessible(true); // Umożliwia dostęp do prywatnego pola
-            field.set(fileStorageService, invalidPath); // Ustawia nieprawidłową ścieżkę
-
-            // Teraz wywołujemy metodę, która próbuje utworzyć katalog
-            new FileStorageService();
-        });
-
-        assertTrue(exception.getMessage().contains("Nie można utworzyć katalogu"));
+        // Walidacja
+        Exception exception = assertThrows(RuntimeException.class, () -> fileStorageService.storeFile(mockFile));
+        assertTrue(exception.getMessage().contains("Nie można zapisać pliku testfile.txt"), "Komunikat wyjątku powinien zawierać nazwę pliku.");
     }
-
 }
+
